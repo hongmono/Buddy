@@ -4,13 +4,38 @@ import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: FloatingWindowController?
+    var wanderEngine: WanderEngine?
+    var displayTimer: Timer?
+    var buddyState = BuddyState()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
         windowController = FloatingWindowController()
-        windowController?.setContent(BlobView(emotion: .idle))
+        windowController?.setContent(BlobView(emotion: buddyState.emotion))
         windowController?.show()
+
+        if let screen = NSScreen.main?.visibleFrame {
+            wanderEngine = WanderEngine(
+                screenBounds: screen,
+                characterSize: CGSize(width: 80, height: 90)
+            )
+        }
+
+        displayTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            self?.tick()
+        }
+    }
+
+    private func tick() {
+        wanderEngine?.tick(deltaTime: 1.0 / 60.0)
+        if let pos = wanderEngine?.currentPosition {
+            windowController?.moveTo(pos)
+        }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        displayTimer?.invalidate()
     }
 }
 

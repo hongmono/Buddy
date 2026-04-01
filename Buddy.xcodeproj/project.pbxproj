@@ -8,13 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		0A9D20C82FBBBA7C7883528A /* BuddyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A556DCDA3181F7F72C7A6427 /* BuddyState.swift */; };
+		4863476E34003522B434F1E5 /* WanderEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06740799CB1A9410BEDC19A /* WanderEngine.swift */; };
 		6013DB13A68311B8503872C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF502F8FB886FB3716DB4674 /* AppDelegate.swift */; };
 		70DB2B7499F6096B4F78167D /* FloatingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C314DCE9562BBB69F0D96B /* FloatingWindowController.swift */; };
+		A10F2AB33F485ADD17AF71DC /* WanderEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6434CA1B25659D0239C1821D /* WanderEngineTests.swift */; };
 		A3FDF39B9637153DB846CF0C /* BuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8115D93E2F6808644D4BFA /* BuddyApp.swift */; };
 		BD44D4E0CC9DD15CAFA23825 /* Emotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F0ED93CB66E71A62194659 /* Emotion.swift */; };
 		C08F6759D0918A4AFC0D7BD6 /* FloatingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C39F138018E6C458CF612C2 /* FloatingWindow.swift */; };
 		D87251635B86D7D0F96FEEF2 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */; };
 		EFB48CD0CA329D03E4AAD419 /* BuddyStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */; };
+		F80861B8F7CFCB9DAA59EE19 /* BlobView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73149E500B8BB5EF6EE6A6DC /* BlobView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +34,8 @@
 		03F0ED93CB66E71A62194659 /* Emotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emotion.swift; sourceTree = "<group>"; };
 		16C314DCE9562BBB69F0D96B /* FloatingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingWindowController.swift; sourceTree = "<group>"; };
 		4C39F138018E6C458CF612C2 /* FloatingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingWindow.swift; sourceTree = "<group>"; };
+		6434CA1B25659D0239C1821D /* WanderEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WanderEngineTests.swift; sourceTree = "<group>"; };
+		73149E500B8BB5EF6EE6A6DC /* BlobView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlobView.swift; sourceTree = "<group>"; };
 		8BE6426EC12149C808484799 /* Buddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Buddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyStateTests.swift; sourceTree = "<group>"; };
 		93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
@@ -38,15 +43,33 @@
 		B62ADAFAFF48938BEF43E220 /* BuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF502F8FB886FB3716DB4674 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ED8115D93E2F6808644D4BFA /* BuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyApp.swift; sourceTree = "<group>"; };
+		F06740799CB1A9410BEDC19A /* WanderEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WanderEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		18F8C123EF0E624C79024576 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				F06740799CB1A9410BEDC19A /* WanderEngine.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
 		7664ADC03C17271916703641 /* BuddyTests */ = {
 			isa = PBXGroup;
 			children = (
 				93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */,
+				6434CA1B25659D0239C1821D /* WanderEngineTests.swift */,
 			);
 			path = BuddyTests;
+			sourceTree = "<group>";
+		};
+		A24A8F8CE15D32470B48D341 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				73149E500B8BB5EF6EE6A6DC /* BlobView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		B784DEB52F1BFBBCE73EC44D /* Buddy */ = {
@@ -56,7 +79,9 @@
 				ED8115D93E2F6808644D4BFA /* BuddyApp.swift */,
 				4C39F138018E6C458CF612C2 /* FloatingWindow.swift */,
 				16C314DCE9562BBB69F0D96B /* FloatingWindowController.swift */,
+				18F8C123EF0E624C79024576 /* Engine */,
 				DA42F27D81A625BCEEF226A7 /* Models */,
+				A24A8F8CE15D32470B48D341 /* Views */,
 			);
 			path = Buddy;
 			sourceTree = "<group>";
@@ -164,6 +189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EFB48CD0CA329D03E4AAD419 /* BuddyStateTests.swift in Sources */,
+				A10F2AB33F485ADD17AF71DC /* WanderEngineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,12 +198,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				6013DB13A68311B8503872C0 /* AppDelegate.swift in Sources */,
+				F80861B8F7CFCB9DAA59EE19 /* BlobView.swift in Sources */,
 				A3FDF39B9637153DB846CF0C /* BuddyApp.swift in Sources */,
 				0A9D20C82FBBBA7C7883528A /* BuddyState.swift in Sources */,
 				D87251635B86D7D0F96FEEF2 /* ChatMessage.swift in Sources */,
 				BD44D4E0CC9DD15CAFA23825 /* Emotion.swift in Sources */,
 				C08F6759D0918A4AFC0D7BD6 /* FloatingWindow.swift in Sources */,
 				70DB2B7499F6096B4F78167D /* FloatingWindowController.swift in Sources */,
+				4863476E34003522B434F1E5 /* WanderEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
