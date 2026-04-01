@@ -9,6 +9,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var buddyState = BuddyState()
     var chatWindowController = ChatWindowController()
     var aiService: AIService?
+    var contextSensor = ContextSensor()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -16,6 +17,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let apiKey = KeychainHelper.load(key: "claude-api-key") {
             aiService = AIService(apiKey: apiKey)
         }
+
+        contextSensor.onContextEvent = { [weak self] context in
+            guard let self = self, let aiService = self.aiService else { return }
+            Task {
+                if let result = await aiService.generateBubble(context: context) {
+                    await MainActor.run {
+                        self.buddyState.showBubble(text: result.text, emotion: result.emotion)
+                        self.updateBlobView()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 3...5)) {
+                            self.buddyState.dismissBubble()
+                            self.updateBlobView()
+                        }
+                    }
+                }
+            }
+        }
+        contextSensor.start()
 
         windowController = FloatingWindowController()
         windowController?.setContent(BlobView(emotion: buddyState.emotion))
@@ -93,6 +111,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         displayTimer?.invalidate()
         windowController?.cleanup()
+        contextSensor.stop()
+    }
+
+    private func updateBlobView() {
+        windowController?.setContent(BlobView(emotion: buddyState.emotion))
     }
 }
 
