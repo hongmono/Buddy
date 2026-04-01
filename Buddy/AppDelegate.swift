@@ -12,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastInteractionTime = Date()
     private var idleTimer: Timer?
     private var currentLookOffset: CGPoint = .zero
+    private var resumeWalkTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -74,12 +75,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Interaction Handling
 
+    private func pauseAndResumeWalk(after delay: TimeInterval = 5) {
+        wanderEngine?.pin()
+        resumeWalkTimer?.invalidate()
+        resumeWalkTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            guard let self = self, !self.buddyState.isPinned else { return }
+            self.wanderEngine?.unpin()
+        }
+    }
+
     private func handleInteraction(_ interaction: PetInteraction) {
         lastInteractionTime = Date()
 
         switch interaction {
         case .tap:
-            // 톡 — 가벼운 반응
+            pauseAndResumeWalk()
             let reactions = [
                 ("응?", Emotion.surprised),
                 ("왜왜?", .happy),
@@ -90,13 +100,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             showBubble(text: reaction.0, emotion: reaction.1)
 
         case .doubleTap:
-            // 더블탭 — 고정 해제
+            resumeWalkTimer?.invalidate()
             buddyState.unpin()
             wanderEngine?.unpin()
             showBubble(text: "다시 돌아다닐게~", emotion: .happy)
 
         case .tripleTap:
-            // 세번 연속 — 짜증
+            pauseAndResumeWalk()
             let reactions = [
                 ("그만 찔러!! 😤", Emotion.surprised),
                 ("아 왜!!!", .surprised),
@@ -106,7 +116,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             showBubble(text: reaction.0, emotion: reaction.1)
 
         case .pet:
-            // 쓰다듬기 — 기분 좋음
+            pauseAndResumeWalk()
             let reactions = [
                 ("헤헤~ 기분 좋다 ☺️", Emotion.happy),
                 ("더 해줘~", .happy),
@@ -117,7 +127,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             showBubble(text: reaction.0, emotion: reaction.1)
 
         case .longPress:
-            // 꾹 누르기 — 놀람
+            pauseAndResumeWalk()
             let reactions = [
                 ("으악!!", Emotion.surprised),
                 ("깜짝이야!", .surprised),
