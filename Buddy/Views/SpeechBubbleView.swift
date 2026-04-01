@@ -34,11 +34,10 @@ struct SpeechBubbleView: View {
                     )
                     .frame(maxWidth: 260)
 
-                // 꼬리 삼각형
+                // 꼬리 삼각형 (캐릭터 중앙 정렬)
                 BubbleTail()
                     .fill(Color(hex: "374058"))
                     .frame(width: 14, height: 8)
-                    .offset(x: 20)
             }
             .transition(.opacity.combined(with: .scale(scale: 0.85, anchor: .bottom)))
         }
