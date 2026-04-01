@@ -7,6 +7,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var wanderEngine: WanderEngine?
     var displayTimer: Timer?
     var buddyState = BuddyState()
+    var chatWindowController = ChatWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -29,7 +30,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         windowController?.onClicked = { [weak self] in
-            // Chat window will be connected in Task 7
+            guard let self = self else { return }
+            if self.chatWindowController.isVisible {
+                self.chatWindowController.close()
+                self.buddyState.isChatOpen = false
+            } else {
+                let frame = self.windowController?.window.frame ?? .zero
+                self.chatWindowController.show(near: frame)
+                self.buddyState.isChatOpen = true
+            }
+        }
+
+        chatWindowController.onSendMessage = { [weak self] text in
+            let userMsg = ChatMessage(role: .user, content: text)
+            self?.chatWindowController.addMessage(userMsg)
+            // AI response will be connected in Task 8
         }
 
         windowController?.onDoubleClicked = { [weak self] in
