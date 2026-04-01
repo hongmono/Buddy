@@ -7,9 +7,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var wanderEngine: WanderEngine?
     var displayTimer: Timer?
     var buddyState = BuddyState()
-    var chatWindowController = ChatWindowController()
     var aiService = AIService()
     var contextSensor = ContextSensor()
+    private var lastInteractionTime = Date()
+    private var idleTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -23,9 +24,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        // 자동 말풍선 (맥 활동 감지)
         contextSensor.onContextEvent = { [weak self] context in
             guard let self = self else { return }
-
             if self.aiService.isRunning {
                 self.aiService.generateBubble(context: context) { [weak self] result in
                     guard let self = self, let result = result else { return }
@@ -40,60 +41,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         contextSensor.start()
 
+        // 윈도우 설정
         windowController = FloatingWindowController()
         windowController?.setContent(BuddyContentView(emotion: buddyState.emotion, bubbleText: nil))
-
         windowController?.setupEventHandling()
 
-        windowController?.onDragStarted = { [weak self] in
-            self?.wanderEngine?.pin()
-            self?.buddyState.isDragging = true
-        }
-
-        windowController?.onDragEnded = { [weak self] position in
-            self?.buddyState.isDragging = false
-            self?.buddyState.pin()
-            self?.wanderEngine?.pin()
-            self?.wanderEngine?.setPosition(position)
-        }
-
-        windowController?.onClicked = { [weak self] in
-            guard let self = self else { return }
-            if self.chatWindowController.isVisible {
-                self.chatWindowController.close()
-                self.buddyState.isChatOpen = false
-            } else {
-                let frame = self.windowController?.window.frame ?? .zero
-                self.chatWindowController.show(near: frame)
-                self.buddyState.isChatOpen = true
-            }
-        }
-
-        chatWindowController.onSendMessage = { [weak self] text in
-            guard let self = self else { return }
-            let userMsg = ChatMessage(role: .user, content: text)
-            self.chatWindowController.addMessage(userMsg)
-
-            if self.aiService.isRunning {
-                self.aiService.chat(message: text) { [weak self] response in
-                    guard let self = self, let response = response else { return }
-                    DispatchQueue.main.async {
-                        let assistantMsg = ChatMessage(role: .assistant, content: response)
-                        self.chatWindowController.addMessage(assistantMsg)
-                    }
-                }
-            }
-        }
-
-        windowController?.onDoubleClicked = { [weak self] in
-            self?.buddyState.unpin()
-            self?.wanderEngine?.unpin()
+        // 인터랙션 핸들링
+        windowController?.onInteraction = { [weak self] interaction in
+            self?.handleInteraction(interaction)
         }
 
         windowController?.show()
 
         if let screen = NSScreen.main?.visibleFrame {
-            // 윈도우 실제 크기 기준으로 경계 계산
             let windowSize = windowController?.window.frame.size ?? CGSize(width: 300, height: 200)
             wanderEngine = WanderEngine(
                 screenBounds: screen,
@@ -104,7 +64,109 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         displayTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
             self?.tick()
         }
+
+        // 방치 감지 타이머
+        idleTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+            self?.checkIdle()
+        }
     }
+
+    // MARK: - Interaction Handling
+
+    private func handleInteraction(_ interaction: PetInteraction) {
+        lastInteractionTime = Date()
+
+        switch interaction {
+        case .tap:
+            // 톡 — 가벼운 반응
+            let reactions = [
+                ("응?", Emotion.surprised),
+                ("왜왜?", .happy),
+                ("뭐야~", .idle),
+                ("불렀어?", .happy),
+            ]
+            let reaction = reactions.randomElement()!
+            showBubble(text: reaction.0, emotion: reaction.1)
+
+        case .doubleTap:
+            // 더블탭 — 고정 해제
+            buddyState.unpin()
+            wanderEngine?.unpin()
+            showBubble(text: "다시 돌아다닐게~", emotion: .happy)
+
+        case .tripleTap:
+            // 세번 연속 — 짜증
+            let reactions = [
+                ("그만 찔러!! 😤", Emotion.surprised),
+                ("아 왜!!!", .surprised),
+                ("그만해~!!", .surprised),
+            ]
+            let reaction = reactions.randomElement()!
+            showBubble(text: reaction.0, emotion: reaction.1)
+
+        case .pet:
+            // 쓰다듬기 — 기분 좋음
+            let reactions = [
+                ("헤헤~ 기분 좋다 ☺️", Emotion.happy),
+                ("더 해줘~", .happy),
+                ("으흐흐~", .happy),
+                ("좋아좋아~", .happy),
+            ]
+            let reaction = reactions.randomElement()!
+            showBubble(text: reaction.0, emotion: reaction.1)
+
+        case .longPress:
+            // 꾹 누르기 — 놀람
+            let reactions = [
+                ("으악!!", Emotion.surprised),
+                ("깜짝이야!", .surprised),
+                ("놀래키지 마... 😨", .surprised),
+            ]
+            let reaction = reactions.randomElement()!
+            showBubble(text: reaction.0, emotion: reaction.1)
+
+        case .dragStart:
+            wanderEngine?.pin()
+            buddyState.isDragging = true
+            showBubble(text: "어디 데려가는 거야?!", emotion: .surprised)
+
+        case .dragEnd(let position):
+            buddyState.isDragging = false
+            buddyState.pin()
+            wanderEngine?.pin()
+            wanderEngine?.setPosition(position)
+            showBubble(text: "여기서 살면 되는 거야?", emotion: .idle)
+
+        case .hover:
+            // 마우스 올려놓기 — 눈이 반응
+            if buddyState.currentBubbleText == nil {
+                buddyState.emotion = .happy
+                updateBlobView()
+            }
+
+        case .hoverEnd:
+            if buddyState.currentBubbleText == nil {
+                buddyState.emotion = .idle
+                updateBlobView()
+            }
+        }
+    }
+
+    // MARK: - Idle Detection
+
+    private func checkIdle() {
+        let elapsed = Date().timeIntervalSince(lastInteractionTime)
+        if elapsed > 30 && buddyState.emotion != .sleepy && buddyState.currentBubbleText == nil {
+            buddyState.emotion = .sleepy
+            updateBlobView()
+        }
+        if elapsed > 60 && buddyState.currentBubbleText == nil {
+            showBubble(text: "zzZ...", emotion: .sleepy)
+            lastInteractionTime = Date() // 리셋해서 계속 뜨지 않게
+        }
+    }
+
+    // MARK: - Tick
 
     private func tick() {
         guard !buddyState.isDragging else { return }
@@ -116,10 +178,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         displayTimer?.invalidate()
+        idleTimer?.invalidate()
         windowController?.cleanup()
         contextSensor.stop()
         aiService.stop()
     }
+
+    // MARK: - Bubble
 
     private func showBubble(text: String, emotion: Emotion) {
         buddyState.showBubble(text: text, emotion: emotion)
