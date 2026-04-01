@@ -9,14 +9,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
 
         windowController = FloatingWindowController()
-        let placeholder = Circle()
-            .fill(LinearGradient(
-                colors: [Color(hex: "a8edea"), Color(hex: "7dd3cc")],
-                startPoint: .top,
-                endPoint: .bottom
-            ))
-            .frame(width: 60, height: 60)
-        windowController?.setContent(placeholder)
+        windowController?.setContent(BlobView(emotion: .idle))
         windowController?.show()
     }
 }
