@@ -7,8 +7,8 @@ struct BuddyApp: App {
 
     var body: some Scene {
         MenuBarExtra("Buddy", systemImage: "face.dashed") {
-            Button("Settings...") {
-                openSettings()
+            SettingsLink {
+                Text("Settings...")
             }
             .keyboardShortcut(",")
             Divider()
@@ -21,10 +21,5 @@ struct BuddyApp: App {
         Settings {
             SettingsView()
         }
-    }
-
-    private func openSettings() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 }
