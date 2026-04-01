@@ -8,9 +8,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var displayTimer: Timer?
     var buddyState = BuddyState()
     var chatWindowController = ChatWindowController()
+    var aiService: AIService?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+
+        if let apiKey = KeychainHelper.load(key: "claude-api-key") {
+            aiService = AIService(apiKey: apiKey)
+        }
 
         windowController = FloatingWindowController()
         windowController?.setContent(BlobView(emotion: buddyState.emotion))
@@ -42,9 +47,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         chatWindowController.onSendMessage = { [weak self] text in
+            guard let self = self else { return }
             let userMsg = ChatMessage(role: .user, content: text)
-            self?.chatWindowController.addMessage(userMsg)
-            // AI response will be connected in Task 8
+            self.chatWindowController.addMessage(userMsg)
+
+            Task {
+                if let response = await self.aiService?.chat(
+                    messages: [],
+                    newMessage: text
+                ) {
+                    await MainActor.run {
+                        let assistantMsg = ChatMessage(role: .assistant, content: response)
+                        self.chatWindowController.addMessage(assistantMsg)
+                    }
+                }
+            }
         }
 
         windowController?.onDoubleClicked = { [weak self] in
