@@ -1,0 +1,23 @@
+name: Buddy
+options:
+  deploymentTarget:
+    macOS: "14.0"
+  bundleIdPrefix: com.hongmono
+targets:
+  Buddy:
+    type: application
+    platform: macOS
+    sources:
+      - Buddy
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.hongmono.Buddy
+  BuddyTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - BuddyTests
+    dependencies:
+      - target: Buddy
