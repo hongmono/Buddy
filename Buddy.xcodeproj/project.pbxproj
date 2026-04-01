@@ -7,8 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A9D20C82FBBBA7C7883528A /* BuddyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A556DCDA3181F7F72C7A6427 /* BuddyState.swift */; };
 		6013DB13A68311B8503872C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF502F8FB886FB3716DB4674 /* AppDelegate.swift */; };
 		A3FDF39B9637153DB846CF0C /* BuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8115D93E2F6808644D4BFA /* BuddyApp.swift */; };
+		BD44D4E0CC9DD15CAFA23825 /* Emotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F0ED93CB66E71A62194659 /* Emotion.swift */; };
+		D87251635B86D7D0F96FEEF2 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */; };
+		EFB48CD0CA329D03E4AAD419 /* BuddyStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -22,7 +26,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		03F0ED93CB66E71A62194659 /* Emotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emotion.swift; sourceTree = "<group>"; };
 		8BE6426EC12149C808484799 /* Buddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Buddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyStateTests.swift; sourceTree = "<group>"; };
+		93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		A556DCDA3181F7F72C7A6427 /* BuddyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyState.swift; sourceTree = "<group>"; };
 		B62ADAFAFF48938BEF43E220 /* BuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF502F8FB886FB3716DB4674 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ED8115D93E2F6808644D4BFA /* BuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyApp.swift; sourceTree = "<group>"; };
@@ -32,6 +40,7 @@
 		7664ADC03C17271916703641 /* BuddyTests */ = {
 			isa = PBXGroup;
 			children = (
+				93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */,
 			);
 			path = BuddyTests;
 			sourceTree = "<group>";
@@ -41,6 +50,7 @@
 			children = (
 				DF502F8FB886FB3716DB4674 /* AppDelegate.swift */,
 				ED8115D93E2F6808644D4BFA /* BuddyApp.swift */,
+				DA42F27D81A625BCEEF226A7 /* Models */,
 			);
 			path = Buddy;
 			sourceTree = "<group>";
@@ -52,6 +62,16 @@
 				7664ADC03C17271916703641 /* BuddyTests */,
 				FF08E58144334FC80ACD8C2B /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		DA42F27D81A625BCEEF226A7 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A556DCDA3181F7F72C7A6427 /* BuddyState.swift */,
+				93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */,
+				03F0ED93CB66E71A62194659 /* Emotion.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		FF08E58144334FC80ACD8C2B /* Products */ = {
@@ -137,6 +157,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EFB48CD0CA329D03E4AAD419 /* BuddyStateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +167,9 @@
 			files = (
 				6013DB13A68311B8503872C0 /* AppDelegate.swift in Sources */,
 				A3FDF39B9637153DB846CF0C /* BuddyApp.swift in Sources */,
+				0A9D20C82FBBBA7C7883528A /* BuddyState.swift in Sources */,
+				D87251635B86D7D0F96FEEF2 /* ChatMessage.swift in Sources */,
+				BD44D4E0CC9DD15CAFA23825 /* Emotion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -316,6 +340,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -332,6 +357,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

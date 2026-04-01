@@ -19,5 +19,8 @@ targets:
     platform: macOS
     sources:
       - BuddyTests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - target: Buddy
