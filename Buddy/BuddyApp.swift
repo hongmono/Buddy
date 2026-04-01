@@ -1,3 +1,4 @@
+// Buddy/BuddyApp.swift
 import SwiftUI
 
 @main
@@ -7,12 +8,23 @@ struct BuddyApp: App {
     var body: some Scene {
         MenuBarExtra("Buddy", systemImage: "ghost.fill") {
             Button("Settings...") {
-                // Settings will be implemented in Task 10
+                openSettings()
             }
+            .keyboardShortcut(",")
             Divider()
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
             }
+            .keyboardShortcut("q")
         }
+
+        Settings {
+            SettingsView()
+        }
+    }
+
+    private func openSettings() {
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
