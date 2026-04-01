@@ -5,9 +5,10 @@ import SwiftUI
 class FloatingWindowController {
     let window: FloatingWindow
     private var isDragging = false
+    private var didDrag = false
     private var dragOffset: CGPoint = .zero
     private var localMonitor: Any?
-    private var dragStartLocation: NSPoint?
+    private var hostingView: NSView?
 
     var onClicked: (() -> Void)?
     var onDragStarted: (() -> Void)?
@@ -21,10 +22,13 @@ class FloatingWindowController {
     }
 
     func setContent<V: View>(_ view: V) {
-        let hostingView = NSHostingView(rootView: view)
-        hostingView.frame = window.contentView?.bounds ?? .zero
-        hostingView.autoresizingMask = [.width, .height]
-        window.contentView?.addSubview(hostingView)
+        // 기존 호스팅 뷰 제거 (서브뷰 쌓임 방지)
+        hostingView?.removeFromSuperview()
+        let newHostingView = NSHostingView(rootView: view)
+        newHostingView.frame = window.contentView?.bounds ?? .zero
+        newHostingView.autoresizingMask = [.width, .height]
+        window.contentView?.addSubview(newHostingView)
+        hostingView = newHostingView
     }
 
     func show() {
@@ -58,16 +62,20 @@ class FloatingWindowController {
                     return event
                 }
                 isDragging = true
+                didDrag = false
                 dragOffset = CGPoint(
                     x: mouseLocation.x - windowFrame.origin.x,
                     y: mouseLocation.y - windowFrame.origin.y
                 )
-                onDragStarted?()
                 return event
             }
 
         case .leftMouseDragged:
             if isDragging {
+                if !didDrag {
+                    didDrag = true
+                    onDragStarted?()
+                }
                 let newOrigin = NSPoint(
                     x: mouseLocation.x - dragOffset.x,
                     y: mouseLocation.y - dragOffset.y
@@ -79,12 +87,15 @@ class FloatingWindowController {
         case .leftMouseUp:
             if isDragging {
                 isDragging = false
-                let finalPos = CGPoint(x: window.frame.origin.x, y: window.frame.origin.y)
-                onDragEnded?(finalPos)
+                if didDrag {
+                    // 실제 드래그가 있었으면 → 고정
+                    let finalPos = CGPoint(x: window.frame.origin.x, y: window.frame.origin.y)
+                    onDragEnded?(finalPos)
+                } else {
+                    // 드래그 없이 mouseDown→mouseUp → 클릭
+                    onClicked?()
+                }
                 return event
-            }
-            if windowFrame.contains(mouseLocation) {
-                onClicked?()
             }
 
         default:
