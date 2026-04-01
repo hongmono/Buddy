@@ -134,6 +134,23 @@ struct GhostBodyShape: Shape {
     }
 }
 
+struct BuddyContentView: View {
+    let emotion: Emotion
+    let bubbleText: String?
+
+    var body: some View {
+        VStack(spacing: 4) {
+            if let text = bubbleText {
+                SpeechBubbleView(text: text, isVisible: true)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    .animation(.easeInOut(duration: 0.3), value: bubbleText)
+            }
+            BlobView(emotion: emotion)
+        }
+        .frame(maxWidth: 300, maxHeight: 200, alignment: .bottom)
+    }
+}
+
 // Smile eye shape for happy emotion
 struct SmileEyeShape: Shape {
     func path(in rect: CGRect) -> Path {

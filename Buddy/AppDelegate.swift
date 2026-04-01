@@ -36,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         contextSensor.start()
 
         windowController = FloatingWindowController()
-        windowController?.setContent(BlobView(emotion: buddyState.emotion))
+        windowController?.setContent(BuddyContentView(emotion: buddyState.emotion, bubbleText: nil))
 
         windowController?.setupEventHandling()
 
@@ -115,7 +115,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateBlobView() {
-        windowController?.setContent(BlobView(emotion: buddyState.emotion))
+        let content = BuddyContentView(
+            emotion: buddyState.emotion,
+            bubbleText: buddyState.currentBubbleText
+        )
+        windowController?.setContent(content)
     }
 }
 
