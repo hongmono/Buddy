@@ -132,10 +132,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         case .dragEnd(let position):
             buddyState.isDragging = false
-            buddyState.pin()
             wanderEngine?.pin()
             wanderEngine?.setPosition(position)
             showBubble(text: "여기서 살면 되는 거야?", emotion: .idle)
+            // 5초 후 다시 걷기
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+                self?.buddyState.unpin()
+                self?.wanderEngine?.unpin()
+            }
 
         case .hover:
             // 마우스 올려놓기 — 눈이 반응
