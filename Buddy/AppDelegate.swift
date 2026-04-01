@@ -11,6 +11,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var contextSensor = ContextSensor()
     private var lastInteractionTime = Date()
     private var idleTimer: Timer?
+    private var currentLookOffset: CGPoint = .zero
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -178,6 +179,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let pos = wanderEngine?.currentPosition {
             windowController?.moveTo(pos)
         }
+        updateLookDirection()
+    }
+
+    private func updateLookDirection() {
+        guard let windowFrame = windowController?.window.frame else { return }
+        let mouseLocation = NSEvent.mouseLocation
+
+        // 캐릭터 중심 기준 커서 방향 계산
+        let center = CGPoint(x: windowFrame.midX, y: windowFrame.midY)
+        let dx = mouseLocation.x - center.x
+        let dy = mouseLocation.y - center.y
+        let distance = sqrt(dx * dx + dy * dy)
+
+        // 거리가 가까울수록 더 강하게 바라봄, 너무 멀면 약하게
+        let maxDistance: CGFloat = 500
+        let intensity = min(distance / maxDistance, 1.0)
+
+        let targetX = (dx / max(distance, 1)) * intensity
+        let targetY = (dy / max(distance, 1)) * intensity
+
+        // 부드럽게 보간
+        currentLookOffset.x += (targetX - currentLookOffset.x) * 0.1
+        currentLookOffset.y += (targetY - currentLookOffset.y) * 0.1
+
+        // 뷰 업데이트 (말풍선 없을 때만 매 프레임 갱신, 있으면 showBubble이 처리)
+        if buddyState.currentBubbleText == nil {
+            let content = BuddyContentView(
+                emotion: buddyState.emotion,
+                bubbleText: nil,
+                lookOffset: currentLookOffset
+            )
+            windowController?.setContent(content)
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -202,7 +236,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateBlobView() {
         let content = BuddyContentView(
             emotion: buddyState.emotion,
-            bubbleText: buddyState.currentBubbleText
+            bubbleText: buddyState.currentBubbleText,
+            lookOffset: currentLookOffset
         )
         windowController?.setContent(content)
     }

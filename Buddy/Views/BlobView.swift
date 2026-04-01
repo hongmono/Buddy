@@ -3,6 +3,8 @@ import SwiftUI
 
 struct BlobView: View {
     let emotion: Emotion
+    var lookOffset: CGPoint = .zero  // 눈동자가 바라보는 방향 (-1~1)
+
     @State private var wavePhase: CGFloat = 0
     @State private var isBlinking: Bool = false
 
@@ -35,25 +37,81 @@ struct BlobView: View {
         }
     }
 
+    // 눈동자 오프셋 (최대 3pt)
+    private var pupilOffset: CGPoint {
+        CGPoint(
+            x: lookOffset.x * 3,
+            y: lookOffset.y * -2  // macOS 좌표계 보정
+        )
+    }
+
     @ViewBuilder
     private var eyesView: some View {
         HStack(spacing: 16) {
             switch emotion {
             case .idle:
-                Capsule().frame(width: 10, height: isBlinking ? 1 : 3)
-                Capsule().frame(width: 10, height: isBlinking ? 1 : 3)
+                // 나른한 눈 + 눈동자
+                ZStack {
+                    Capsule()
+                        .frame(width: 12, height: isBlinking ? 1 : 5)
+                        .foregroundColor(Color(hex: "1a1a2e"))
+                    if !isBlinking {
+                        Circle()
+                            .frame(width: 3, height: 3)
+                            .foregroundColor(Color(hex: "1a1a2e"))
+                            .offset(x: pupilOffset.x, y: pupilOffset.y)
+                    }
+                }
+                ZStack {
+                    Capsule()
+                        .frame(width: 12, height: isBlinking ? 1 : 5)
+                        .foregroundColor(Color(hex: "1a1a2e"))
+                    if !isBlinking {
+                        Circle()
+                            .frame(width: 3, height: 3)
+                            .foregroundColor(Color(hex: "1a1a2e"))
+                            .offset(x: pupilOffset.x, y: pupilOffset.y)
+                    }
+                }
+
             case .happy:
                 SmileEyeShape().stroke(lineWidth: 2).frame(width: 10, height: 6)
+                    .foregroundColor(Color(hex: "1a1a2e"))
                 SmileEyeShape().stroke(lineWidth: 2).frame(width: 10, height: 6)
+                    .foregroundColor(Color(hex: "1a1a2e"))
+
             case .surprised:
-                Circle().frame(width: isBlinking ? 8 : 10, height: isBlinking ? 2 : 10)
-                Circle().frame(width: isBlinking ? 8 : 10, height: isBlinking ? 2 : 10)
+                // 동그란 눈 + 눈동자
+                ZStack {
+                    Circle()
+                        .stroke(Color(hex: "1a1a2e"), lineWidth: 2)
+                        .frame(width: isBlinking ? 10 : 12, height: isBlinking ? 2 : 12)
+                    if !isBlinking {
+                        Circle()
+                            .frame(width: 4, height: 4)
+                            .foregroundColor(Color(hex: "1a1a2e"))
+                            .offset(x: pupilOffset.x, y: pupilOffset.y)
+                    }
+                }
+                ZStack {
+                    Circle()
+                        .stroke(Color(hex: "1a1a2e"), lineWidth: 2)
+                        .frame(width: isBlinking ? 10 : 12, height: isBlinking ? 2 : 12)
+                    if !isBlinking {
+                        Circle()
+                            .frame(width: 4, height: 4)
+                            .foregroundColor(Color(hex: "1a1a2e"))
+                            .offset(x: pupilOffset.x, y: pupilOffset.y)
+                    }
+                }
+
             case .sleepy:
                 Capsule().frame(width: 10, height: 2)
+                    .foregroundColor(Color(hex: "1a1a2e"))
                 Capsule().frame(width: 10, height: 2)
+                    .foregroundColor(Color(hex: "1a1a2e"))
             }
         }
-        .foregroundColor(Color(hex: "1a1a2e"))
     }
 
     @ViewBuilder
@@ -103,7 +161,6 @@ struct GhostBodyShape: Shape {
         let h = rect.height
         let waveHeight: CGFloat = 6
 
-        // Top dome
         path.move(to: CGPoint(x: 0, y: h * 0.45))
         path.addCurve(
             to: CGPoint(x: w, y: h * 0.45),
@@ -111,10 +168,8 @@ struct GhostBodyShape: Shape {
             control2: CGPoint(x: w, y: -h * 0.1)
         )
 
-        // Right side
         path.addLine(to: CGPoint(x: w, y: h - waveHeight))
 
-        // Bottom wave
         let waveOffset = wavePhase * 4
         let segments = 5
         let segmentWidth = w / CGFloat(segments)
@@ -137,6 +192,7 @@ struct GhostBodyShape: Shape {
 struct BuddyContentView: View {
     let emotion: Emotion
     let bubbleText: String?
+    var lookOffset: CGPoint = .zero
 
     var body: some View {
         VStack(spacing: 4) {
@@ -145,7 +201,7 @@ struct BuddyContentView: View {
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                     .animation(.easeInOut(duration: 0.3), value: bubbleText)
             }
-            BlobView(emotion: emotion)
+            BlobView(emotion: emotion, lookOffset: lookOffset)
         }
         .frame(maxWidth: 300, maxHeight: 200, alignment: .bottom)
     }
