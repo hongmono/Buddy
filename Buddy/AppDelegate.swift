@@ -93,9 +93,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         windowController?.show()
 
         if let screen = NSScreen.main?.visibleFrame {
+            // 윈도우 실제 크기 기준으로 경계 계산
+            let windowSize = windowController?.window.frame.size ?? CGSize(width: 300, height: 200)
             wanderEngine = WanderEngine(
                 screenBounds: screen,
-                characterSize: CGSize(width: 80, height: 90)
+                characterSize: windowSize
             )
         }
 

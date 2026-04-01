@@ -7,33 +7,52 @@ struct SpeechBubbleView: View {
 
     var body: some View {
         if isVisible {
-            Text(text)
-                .font(.system(size: 13))
-                .foregroundColor(Color(hex: "1a1a2e"))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(
-                    BubbleShape()
-                        .fill(Color.white.opacity(0.95))
-                        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 2)
-                )
-                .frame(maxWidth: 280)
-                .transition(.opacity.combined(with: .scale(scale: 0.8)))
+            VStack(spacing: 0) {
+                Text(text)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.92))
+                    .lineSpacing(3)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(hex: "2d3250"),
+                                        Color(hex: "374058")
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(hex: "a8edea").opacity(0.25), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.25), radius: 12, x: 0, y: 4)
+                    )
+                    .frame(maxWidth: 260)
+
+                // 꼬리 삼각형
+                BubbleTail()
+                    .fill(Color(hex: "374058"))
+                    .frame(width: 14, height: 8)
+                    .offset(x: 20)
+            }
+            .transition(.opacity.combined(with: .scale(scale: 0.85, anchor: .bottom)))
         }
     }
 }
 
-struct BubbleShape: Shape {
+// 말풍선 아래 꼬리
+struct BubbleTail: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        let radius: CGFloat = 14
-        let tailSize: CGFloat = 8
-        let mainRect = CGRect(x: 0, y: 0, width: rect.width, height: rect.height - tailSize)
-        path.addRoundedRect(in: mainRect, cornerSize: CGSize(width: radius, height: radius))
-        let tailX = rect.width - 20
-        path.move(to: CGPoint(x: tailX, y: mainRect.maxY))
-        path.addLine(to: CGPoint(x: tailX + tailSize, y: rect.height))
-        path.addLine(to: CGPoint(x: tailX + tailSize * 2, y: mainRect.maxY))
+        path.move(to: CGPoint(x: 0, y: 0))
+        path.addLine(to: CGPoint(x: rect.width / 2, y: rect.height))
+        path.addLine(to: CGPoint(x: rect.width, y: 0))
+        path.closeSubpath()
         return path
     }
 }
