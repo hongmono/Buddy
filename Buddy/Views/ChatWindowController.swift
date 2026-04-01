@@ -2,6 +2,12 @@
 import AppKit
 import SwiftUI
 
+// Borderless 윈도우가 키보드 입력을 받으려면 canBecomeKey 필요
+class KeyableWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
+}
+
 class ChatWindowController {
     private var window: NSWindow?
     private var messages: [ChatMessage] = []
@@ -11,7 +17,7 @@ class ChatWindowController {
     func show(near characterFrame: NSRect) {
         guard window == nil else { return }
 
-        let chatWindow = NSWindow(
+        let chatWindow = KeyableWindow(
             contentRect: NSRect(x: 0, y: 0, width: 280, height: 400),
             styleMask: [.borderless],
             backing: .buffered,
@@ -30,6 +36,7 @@ class ChatWindowController {
 
         updateContent(in: chatWindow)
         chatWindow.orderFront(nil)
+        chatWindow.makeKey()
         self.window = chatWindow
     }
 
