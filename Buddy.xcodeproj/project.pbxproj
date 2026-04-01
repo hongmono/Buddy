@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0A9D20C82FBBBA7C7883528A /* BuddyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A556DCDA3181F7F72C7A6427 /* BuddyState.swift */; };
 		14F719C0949759B9993A74EC /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7D6BE8EAAA4FFF8F3DC6F5 /* ChatView.swift */; };
+		3C4F11136D3C221497FAB47C /* ShellEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB56600BB09F0FE1EA308013 /* ShellEnvironment.swift */; };
 		4863476E34003522B434F1E5 /* WanderEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06740799CB1A9410BEDC19A /* WanderEngine.swift */; };
 		54842923E601C53E6C83160B /* ContextSensor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5104F45DDE3BC9D0E1CE4F5F /* ContextSensor.swift */; };
 		6013DB13A68311B8503872C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF502F8FB886FB3716DB4674 /* AppDelegate.swift */; };
@@ -55,6 +56,7 @@
 		93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		A556DCDA3181F7F72C7A6427 /* BuddyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyState.swift; sourceTree = "<group>"; };
 		B62ADAFAFF48938BEF43E220 /* BuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB56600BB09F0FE1EA308013 /* ShellEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellEnvironment.swift; sourceTree = "<group>"; };
 		BE7D6BE8EAAA4FFF8F3DC6F5 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		C485BE7AD6049572479FC68F /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		DF502F8FB886FB3716DB4674 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 			children = (
 				F00CBB24A4ADAC80FE6FDB52 /* AIService.swift */,
 				C485BE7AD6049572479FC68F /* KeychainHelper.swift */,
+				BB56600BB09F0FE1EA308013 /* ShellEnvironment.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -248,6 +251,7 @@
 				70DB2B7499F6096B4F78167D /* FloatingWindowController.swift in Sources */,
 				C8CE33C01B33849524452874 /* KeychainHelper.swift in Sources */,
 				D68109C8EEF80DCE79F3851B /* SettingsView.swift in Sources */,
+				3C4F11136D3C221497FAB47C /* ShellEnvironment.swift in Sources */,
 				CC4F12735D320C13B8BC9505 /* SpeechBubbleView.swift in Sources */,
 				4863476E34003522B434F1E5 /* WanderEngine.swift in Sources */,
 			);

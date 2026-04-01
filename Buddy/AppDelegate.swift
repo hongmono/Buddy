@@ -8,30 +8,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var displayTimer: Timer?
     var buddyState = BuddyState()
     var chatWindowController = ChatWindowController()
-    var aiService: AIService?
+    var aiService = AIService()
     var contextSensor = ContextSensor()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
-        if let apiKey = KeychainHelper.load(key: "claude-api-key") {
-            aiService = AIService(apiKey: apiKey)
+        // Claude CLI 시작
+        aiService.start { success in
+            if success {
+                print("Claude CLI connected")
+            } else {
+                print("Claude CLI not found — using fallback bubbles")
+            }
         }
 
         contextSensor.onContextEvent = { [weak self] context in
             guard let self = self else { return }
 
-            // AI 서비스가 있으면 Claude API로 생성
-            if let aiService = self.aiService {
-                Task {
-                    if let result = await aiService.generateBubble(context: context) {
-                        await MainActor.run {
-                            self.showBubble(text: result.text, emotion: result.emotion)
-                        }
+            if self.aiService.isRunning {
+                self.aiService.generateBubble(context: context) { [weak self] result in
+                    guard let self = self, let result = result else { return }
+                    DispatchQueue.main.async {
+                        self.showBubble(text: result.text, emotion: result.emotion)
                     }
                 }
             } else {
-                // API 키가 없으면 기본 대사 사용
                 let fallback = Self.fallbackBubble(for: context)
                 self.showBubble(text: fallback.text, emotion: fallback.emotion)
             }
@@ -72,12 +74,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let userMsg = ChatMessage(role: .user, content: text)
             self.chatWindowController.addMessage(userMsg)
 
-            Task {
-                if let response = await self.aiService?.chat(
-                    messages: [],
-                    newMessage: text
-                ) {
-                    await MainActor.run {
+            if self.aiService.isRunning {
+                self.aiService.chat(message: text) { [weak self] response in
+                    guard let self = self, let response = response else { return }
+                    DispatchQueue.main.async {
                         let assistantMsg = ChatMessage(role: .assistant, content: response)
                         self.chatWindowController.addMessage(assistantMsg)
                     }
@@ -116,6 +116,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         displayTimer?.invalidate()
         windowController?.cleanup()
         contextSensor.stop()
+        aiService.stop()
     }
 
     private func showBubble(text: String, emotion: Emotion) {

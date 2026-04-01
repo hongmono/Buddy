@@ -6,9 +6,8 @@ struct SettingsView: View {
     @AppStorage("buddyName") private var buddyName: String = "Buddy"
     @AppStorage("bubbleFrequency") private var bubbleFrequency: Double = 10
     @AppStorage("wanderEnabled") private var wanderEnabled: Bool = true
-    @State private var apiKey: String = ""
     @State private var launchAtLogin: Bool = false
-    @State private var showSavedAlert: Bool = false
+    @State private var claudeFound: Bool = false
 
     var body: some View {
         Form {
@@ -18,13 +17,21 @@ struct SettingsView: View {
             }
 
             Section("AI") {
-                SecureField("Claude API Key", text: $apiKey)
-                Button("저장") {
-                    KeychainHelper.save(key: "claude-api-key", value: apiKey)
-                    showSavedAlert = true
+                HStack {
+                    Text("Claude Code CLI")
+                    Spacer()
+                    if claudeFound {
+                        Text("연결됨 ✓")
+                            .foregroundColor(.green)
+                    } else {
+                        Text("미설치")
+                            .foregroundColor(.secondary)
+                    }
                 }
-                .alert("API 키가 저장되었어요!", isPresented: $showSavedAlert) {
-                    Button("OK") {}
+                if !claudeFound {
+                    Text("Claude Code CLI를 설치하면 AI 기능을 사용할 수 있어요.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
 
@@ -45,9 +52,11 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 350, height: 400)
+        .frame(width: 350, height: 350)
         .onAppear {
-            apiKey = KeychainHelper.load(key: "claude-api-key") ?? ""
+            AIService.findClaude { path in
+                claudeFound = path != nil
+            }
         }
     }
 
