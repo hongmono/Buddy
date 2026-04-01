@@ -13,6 +13,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         windowController = FloatingWindowController()
         windowController?.setContent(BlobView(emotion: buddyState.emotion))
+
+        windowController?.setupEventHandling()
+
+        windowController?.onDragStarted = { [weak self] in
+            self?.wanderEngine?.pin()
+            self?.buddyState.isDragging = true
+        }
+
+        windowController?.onDragEnded = { [weak self] position in
+            self?.buddyState.isDragging = false
+            self?.buddyState.pin()
+            self?.wanderEngine?.pin()
+            self?.wanderEngine?.setPosition(position)
+        }
+
+        windowController?.onClicked = { [weak self] in
+            // Chat window will be connected in Task 7
+        }
+
+        windowController?.onDoubleClicked = { [weak self] in
+            self?.buddyState.unpin()
+            self?.wanderEngine?.unpin()
+        }
+
         windowController?.show()
 
         if let screen = NSScreen.main?.visibleFrame {
@@ -36,6 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         displayTimer?.invalidate()
+        windowController?.cleanup()
     }
 }
 
