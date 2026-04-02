@@ -53,6 +53,27 @@ struct WanderEngine {
         }
 
         totalTime += deltaTime
+
+        // 목표 위치로 이동 중
+        if let target = moveTarget {
+            let dx = target.x - basePosition.x
+            let dy = target.y - basePosition.y
+            let dist = sqrt(dx * dx + dy * dy)
+
+            if dist < 5 {
+                // 도착
+                basePosition = target
+                moveTarget = nil
+            } else {
+                let nx = dx / dist
+                let ny = dy / dist
+                basePosition.x += nx * moveSpeed * deltaTime
+                basePosition.y += ny * moveSpeed * deltaTime
+            }
+            applyBob()
+            return
+        }
+
         timeSinceLastChange += deltaTime
 
         // 멈추기
@@ -150,6 +171,28 @@ struct WanderEngine {
     mutating func setPosition(_ point: CGPoint) {
         currentPosition = point
         basePosition = point
+    }
+
+    /// 목표 위치 (nil이면 자유 이동)
+    private var moveTarget: CGPoint?
+    private var moveSpeed: CGFloat = 0
+
+    /// 특정 위치로 이동 시작
+    mutating func moveTo(target: CGPoint, speed: CGFloat = 80) {
+        moveTarget = target
+        moveSpeed = speed
+        isPinnedState = false
+        isPaused = false
+    }
+
+    /// 목표 이동 중인지
+    var isMovingToTarget: Bool {
+        moveTarget != nil
+    }
+
+    /// 목표 이동 취소
+    mutating func cancelMoveTarget() {
+        moveTarget = nil
     }
 
     /// 외부 힘 적용 (충돌 반발 등)

@@ -8,6 +8,8 @@ class CharacterInstance {
     var wanderEngine: WanderEngine
     var buddyState: BuddyState
     var aiService: AIService
+    var chatWindowController: ChatWindowController?
+    var onDeviceAI: Any?  // OnDeviceAIService (macOS 26+)
     var currentLookOffset: CGPoint = .zero
     var lastInteractionTime: Date = Date()
     var resumeWalkTimer: Timer?
@@ -18,6 +20,12 @@ class CharacterInstance {
         self.wanderEngine = wanderEngine
         self.buddyState = buddyState
         self.aiService = aiService
+
+        if #available(macOS 26.0, *) {
+            let ai = OnDeviceAIService()
+            ai.createSession(characterName: character.name, personality: character.personality)
+            self.onDeviceAI = ai
+        }
     }
 }
 
@@ -178,15 +186,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         switch interaction {
         case .tap:
-            pauseAndResumeWalk(for: id)
-            let reactions = [
-                ("응?", Emotion.surprised),
-                ("왜왜?", .happy),
-                ("뭐야~", .idle),
-                ("불렀어?", .happy),
-            ]
-            let reaction = reactions.randomElement()!
-            showBubble(text: reaction.0, emotion: reaction.1, for: id)
+            // 채팅창 토글
+            toggleChat(for: id)
 
         case .doubleTap:
             instance.resumeWalkTimer?.invalidate()
@@ -446,6 +447,165 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             ("같이 놀자~", .happy),
         ]
         return randomLines.randomElement()!
+    }
+
+    // MARK: - Chat
+
+    private func toggleChat(for id: UUID) {
+        guard let instance = instances[id] else { return }
+
+        if let chat = instance.chatWindowController, chat.isVisible {
+            chat.close()
+            instance.chatWindowController = nil
+        } else {
+            let chat = ChatWindowController()
+            chat.onSendMessage = { [weak self] text in
+                self?.handleChatMessage(text, for: id)
+            }
+            let frame = instance.windowController.window.frame
+            chat.show(near: frame)
+            instance.chatWindowController = chat
+
+            chat.addMessage(ChatMessage(role: .assistant, content: "뭐 할까? 😊"))
+        }
+    }
+
+    private func handleChatMessage(_ text: String, for id: UUID) {
+        guard let instance = instances[id] else { return }
+
+        // 사용자 메시지 표시
+        instance.chatWindowController?.addMessage(ChatMessage(role: .user, content: text))
+
+        let characterNames = characterStore.characters.map { $0.name }
+
+        // Apple Intelligence로 의도 분석
+        if #available(macOS 26.0, *), let onDeviceAI = instance.onDeviceAI as? OnDeviceAIService {
+            Task { @MainActor in
+                let result = await onDeviceAI.analyzeIntent(text)
+
+                switch result {
+                case .command(let command, let targetName, let reaction):
+                    // 명령 실행
+                    self.executeCommand(command, for: id, targetName: targetName)
+                    let response = reaction ?? command.reaction.text
+                    instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: response))
+                    self.showBubble(text: response, emotion: command.reaction.emotion, for: id)
+
+                case .chat(let needsComplexAI, let simpleResponse):
+                    if needsComplexAI && instance.aiService.isRunning {
+                        // Claude CLI로 전달
+                        instance.aiService.chat(message: text) { [weak self] response in
+                            DispatchQueue.main.async {
+                                let reply = response ?? "음... 잘 모르겠어"
+                                instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: reply))
+                                self?.showBubble(text: String(reply.prefix(50)), emotion: .idle, for: id)
+                            }
+                        }
+                    } else if let response = simpleResponse {
+                        // Apple AI 응답
+                        instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: response))
+                        self.showBubble(text: String(response.prefix(50)), emotion: .happy, for: id)
+                    } else {
+                        // 둘 다 안 되면 fallback
+                        let fallback = "흐음... 잘 모르겠어~ 😅"
+                        instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: fallback))
+                    }
+                }
+            }
+        } else if instance.aiService.isRunning {
+            // Apple AI 없으면 Claude CLI 직접
+            instance.aiService.chat(message: text) { [weak self] response in
+                DispatchQueue.main.async {
+                    let reply = response ?? "음... 잘 모르겠어"
+                    instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: reply))
+                    self?.showBubble(text: String(reply.prefix(50)), emotion: .idle, for: id)
+                }
+            }
+        } else {
+            let fallback = "아직 AI가 연결 안 됐어~ 명령어는 사용할 수 있어!"
+            instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: fallback))
+        }
+    }
+
+    // MARK: - Command Execution
+
+    private func executeCommand(_ command: BuddyCommand, for id: UUID, targetName: String? = nil) {
+        guard let instance = instances[id] else { return }
+
+        switch command {
+        case .comeHere:
+            let mouse = NSEvent.mouseLocation
+            instance.wanderEngine.moveTo(target: CGPoint(x: mouse.x - 30, y: mouse.y - 35))
+
+        case .goAway:
+            let mouse = NSEvent.mouseLocation
+            let center = instance.wanderEngine.center
+            let dx = center.x - mouse.x
+            let dy = center.y - mouse.y
+            let dist = max(sqrt(dx * dx + dy * dy), 1)
+            let target = CGPoint(
+                x: center.x + (dx / dist) * 200,
+                y: center.y + (dy / dist) * 200
+            )
+            instance.wanderEngine.moveTo(target: target)
+
+        case .stop:
+            instance.wanderEngine.pin()
+            instance.wanderEngine.cancelMoveTarget()
+
+        case .wander:
+            instance.wanderEngine.unpin()
+            instance.wanderEngine.cancelMoveTarget()
+
+        case .sleep:
+            instance.wanderEngine.pin()
+            instance.wanderEngine.cancelMoveTarget()
+            instance.buddyState.emotion = .sleepy
+            updateBlobView(for: id)
+
+        case .wakeUp:
+            instance.wanderEngine.unpin()
+            instance.buddyState.emotion = .happy
+            updateBlobView(for: id)
+
+        case .dance:
+            // 빠른 보빙으로 춤 효과 (3초 후 복귀)
+            instance.wanderEngine.pin()
+            instance.buddyState.emotion = .happy
+            updateBlobView(for: id)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                self?.instances[id]?.wanderEngine.unpin()
+                self?.instances[id]?.buddyState.emotion = .idle
+                self?.updateBlobView(for: id)
+            }
+
+        case .gather:
+            // 모든 캐릭터를 이 캐릭터 위치로 모음
+            let target = instance.wanderEngine.center
+            for (otherId, otherInstance) in instances where otherId != id {
+                otherInstance.wanderEngine.moveTo(target: target)
+                showBubble(text: "가는 중~!", emotion: .happy, for: otherId)
+            }
+
+        case .scatter:
+            let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 800, height: 600)
+            for (otherId, otherInstance) in instances {
+                let randomTarget = CGPoint(
+                    x: CGFloat.random(in: screen.minX...screen.maxX - 100),
+                    y: CGFloat.random(in: screen.minY...screen.maxY - 100)
+                )
+                otherInstance.wanderEngine.moveTo(target: randomTarget)
+                if otherId != id {
+                    showBubble(text: "흩어져~!", emotion: .surprised, for: otherId)
+                }
+            }
+
+        case .goToCharacter:
+            if let name = targetName,
+               let target = instances.values.first(where: { $0.character.name == name }) {
+                instance.wanderEngine.moveTo(target: target.wanderEngine.center)
+            }
+        }
     }
 }
 
