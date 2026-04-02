@@ -30,7 +30,9 @@ struct CharacterListView: View {
                         .buttonStyle(.borderless)
                         if store.characters.count > 1 {
                             Button(role: .destructive) {
-                                store.remove(id: character.id)
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    store.remove(id: character.id)
+                                }
                                 onCharacterRemoved?(character.id)
                             } label: {
                                 Image(systemName: "trash")
@@ -45,14 +47,17 @@ struct CharacterListView: View {
                             character: character,
                             store: store,
                             onSave: { updated in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    editingCharacterId = nil
+                                }
                                 onCharacterUpdated?(updated)
-                                editingCharacterId = nil
                             },
                             onPreview: { updated in
                                 onCharacterPreview?(updated)
                             }
                         )
                         .padding(.top, 4)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 }
             }
@@ -60,7 +65,9 @@ struct CharacterListView: View {
             if store.characters.count < CharacterStore.maxCharacters {
                 Button {
                     let new = BuddyCharacter(name: "New Buddy")
-                    store.add(new)
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        store.add(new)
+                    }
                     onCharacterAdded?(new)
                 } label: {
                     Label("캐릭터 추가", systemImage: "plus")

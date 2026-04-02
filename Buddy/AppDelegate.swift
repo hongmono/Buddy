@@ -144,8 +144,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Context Event
 
     private func handleContextEvent(_ context: String) {
-        // 랜덤 캐릭터 하나를 골라서 반응
-        guard let (id, instance) = instances.randomElement() else { return }
+        // 말풍선 켜진 캐릭터 중 랜덤 하나
+        let eligible = instances.filter { $0.value.character.bubbleEnabled }
+        guard let (id, instance) = eligible.randomElement() else { return }
         if instance.aiService.isRunning {
             instance.aiService.generateBubble(context: context) { [weak self] result in
                 guard let self = self, let result = result else { return }
@@ -397,6 +398,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showBubble(text: String, emotion: Emotion, for id: UUID) {
         guard let instance = instances[id] else { return }
+        guard instance.character.bubbleEnabled else {
+            // 말풍선 꺼져있으면 감정만 변경
+            instance.buddyState.emotion = emotion
+            updateBlobView(for: id)
+            return
+        }
         instance.buddyState.showBubble(text: text, emotion: emotion)
         updateBlobView(for: id)
         DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 3...5)) { [weak self] in

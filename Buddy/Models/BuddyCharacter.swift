@@ -54,7 +54,9 @@ struct BuddyCharacter: Codable, Identifiable, Equatable {
     var imageOffsetX: Double // 이미지 내 표시 위치 X (-1.0 ~ 1.0)
     var imageOffsetY: Double // 이미지 내 표시 위치 Y (-1.0 ~ 1.0)
 
-    init(id: UUID = UUID(), name: String = "Buddy", appearance: CharacterAppearance = .ghost, personality: String = "다정하고 장난기 있고, 약간 나른한 유령", scale: Double = 1.0, imageShape: ImageShape = .none, imageZoom: Double = 1.0, imageOffsetX: Double = 0, imageOffsetY: Double = 0) {
+    var bubbleEnabled: Bool  // 말풍선 표시 여부
+
+    init(id: UUID = UUID(), name: String = "Buddy", appearance: CharacterAppearance = .ghost, personality: String = "다정하고 장난기 있고, 약간 나른한 유령", scale: Double = 1.0, imageShape: ImageShape = .none, imageZoom: Double = 1.0, imageOffsetX: Double = 0, imageOffsetY: Double = 0, bubbleEnabled: Bool = true) {
         self.id = id
         self.name = name
         self.appearance = appearance
@@ -64,6 +66,7 @@ struct BuddyCharacter: Codable, Identifiable, Equatable {
         self.imageZoom = imageZoom
         self.imageOffsetX = imageOffsetX
         self.imageOffsetY = imageOffsetY
+        self.bubbleEnabled = bubbleEnabled
     }
 
     /// 스케일 적용된 캐릭터 크기

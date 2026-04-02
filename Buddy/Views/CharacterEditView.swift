@@ -15,15 +15,25 @@ struct CharacterEditInlineView: View {
             HStack {
                 Text("이름")
                     .frame(width: 40, alignment: .leading)
-                TextField("이름", text: $character.name)
+                TextField("", text: $character.name, prompt: Text("이름"))
                     .textFieldStyle(.roundedBorder)
             }
 
             HStack {
                 Text("성격")
                     .frame(width: 40, alignment: .leading)
-                TextField("성격", text: $character.personality)
+                TextField("", text: $character.personality, prompt: Text("성격"))
                     .textFieldStyle(.roundedBorder)
+            }
+
+            HStack {
+                Text("말풍선")
+                    .frame(width: 40, alignment: .leading)
+                Toggle("", isOn: $character.bubbleEnabled)
+                    .labelsHidden()
+                Text(character.bubbleEnabled ? "켜짐" : "꺼짐")
+                    .foregroundColor(.secondary)
+                    .font(.caption)
             }
 
             HStack {
