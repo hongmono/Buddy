@@ -86,8 +86,8 @@ class FloatingWindowController {
             self?.handleMouseEvent(event) ?? event
         }
 
-        // 글로벌 마우스 이동 감지 (hover용)
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved]) { [weak self] event in
+        // 글로벌 마우스 이동 감지 (hover + 클릭 통과 제어)
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseUp]) { [weak self] event in
             self?.checkHover()
         }
     }
@@ -213,9 +213,15 @@ class FloatingWindowController {
 
     private func checkHover() {
         let mouseLocation = NSEvent.mouseLocation
-        let windowFrame = window.frame
+        let overCharacter = window.isPointInCharacter(mouseLocation)
+
+        // 캐릭터 영역 밖이면 클릭을 뒤로 통과시킴
+        if !isDragging {
+            window.ignoresMouseEvents = !overCharacter
+        }
+
         let wasHovering = isHovering
-        isHovering = window.isPointInCharacter(mouseLocation)
+        isHovering = overCharacter
 
         if isHovering && !wasHovering {
             onInteraction?(.hover)
