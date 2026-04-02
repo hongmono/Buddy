@@ -88,17 +88,8 @@ struct CharacterEditInlineView: View {
                         .foregroundColor(.secondary)
                 }
 
-                HStack {
-                    Text("위치X")
-                        .frame(width: 40, alignment: .leading)
-                    Slider(value: $character.imageOffsetX, in: -1.0...1.0, step: 0.05)
-                }
-
-                HStack {
-                    Text("위치Y")
-                        .frame(width: 40, alignment: .leading)
-                    Slider(value: $character.imageOffsetY, in: -1.0...1.0, step: 0.05)
-                }
+                // 드래그 프리뷰
+                ImageCropPreview(character: $character)
             }
 
             HStack {
@@ -127,6 +118,94 @@ struct CharacterEditInlineView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+/// 이미지 위치를 드래그로 조정하는 프리뷰
+struct ImageCropPreview: View {
+    @Binding var character: BuddyCharacter
+    @State private var dragStartOffset: (x: Double, y: Double) = (0, 0)
+
+    private let previewSize: CGFloat = 120
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("위치 조정")
+                    .font(.caption)
+                Spacer()
+                Button("초기화") {
+                    character.imageOffsetX = 0
+                    character.imageOffsetY = 0
+                }
+                .font(.caption2)
+                .buttonStyle(.borderless)
+            }
+
+            // 프리뷰 + 드래그 영역
+            ZStack {
+                // 배경
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.black.opacity(0.3))
+
+                // 이미지 프리뷰 (실제 결과와 동일하게 렌더링)
+                if case .image(let filename) = character.appearance,
+                   let nsImage = NSImage(contentsOf: CharacterStore.imagesDirectory.appendingPathComponent(filename)) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .scaledToFill()
+                        .scaleEffect(CGFloat(character.imageZoom))
+                        .offset(
+                            x: CGFloat(character.imageOffsetX) * previewSize * 0.3,
+                            y: CGFloat(character.imageOffsetY) * previewSize * 0.3
+                        )
+                        .frame(width: previewSize - 16, height: previewSize - 16)
+                        .mask(previewClipShape.frame(width: previewSize - 16, height: previewSize - 16))
+                }
+
+                // "드래그" 힌트
+                if character.imageOffsetX == 0 && character.imageOffsetY == 0 {
+                    Text("드래그하여 위치 조정")
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.6))
+                }
+            }
+            .frame(width: previewSize, height: previewSize)
+            .cornerRadius(8)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        let sensitivity: CGFloat = 2.0 / previewSize
+                        let newX = dragStartOffset.x + Double(value.translation.width * sensitivity)
+                        let newY = dragStartOffset.y + Double(value.translation.height * sensitivity)
+                        character.imageOffsetX = max(-1, min(1, newX))
+                        character.imageOffsetY = max(-1, min(1, newY))
+                    }
+                    .onEnded { _ in
+                        dragStartOffset = (character.imageOffsetX, character.imageOffsetY)
+                    }
+            )
+            .onAppear {
+                dragStartOffset = (character.imageOffsetX, character.imageOffsetY)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
+    @ViewBuilder
+    private var previewClipShape: some View {
+        switch character.imageShape {
+        case .none:
+            Rectangle()
+        case .circle:
+            Circle()
+        case .rounded:
+            RoundedRectangle(cornerRadius: (previewSize - 16) * 0.2)
+        case .square:
+            Rectangle()
+        case .star:
+            StarShape(points: 5)
         }
     }
 }
