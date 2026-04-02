@@ -122,90 +122,177 @@ struct CharacterEditInlineView: View {
     }
 }
 
-/// 이미지 위치를 드래그로 조정하는 프리뷰
+/// 이미지 위에 마스크 영역을 드래그/리사이즈하는 크롭 프리뷰
 struct ImageCropPreview: View {
     @Binding var character: BuddyCharacter
-    @State private var dragStartOffset: (x: Double, y: Double) = (0, 0)
 
-    private let previewSize: CGFloat = 120
+    private let previewSize: CGFloat = 180
+
+    // 마스크 위치/크기를 픽셀 단위로 관리
+    @State private var maskCenter: CGPoint = .zero
+    @State private var maskSize: CGFloat = 80
+    @State private var dragStart: CGPoint = .zero
+    @State private var resizeStart: CGFloat = 0
+    @State private var initialized = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("위치 조정")
+                Text("영역 선택")
                     .font(.caption)
                 Spacer()
                 Button("초기화") {
-                    character.imageOffsetX = 0
-                    character.imageOffsetY = 0
+                    maskCenter = CGPoint(x: previewSize / 2, y: previewSize / 2)
+                    maskSize = previewSize * 0.6
+                    syncToModel()
                 }
                 .font(.caption2)
                 .buttonStyle(.borderless)
             }
 
-            // 프리뷰 + 드래그 영역
             ZStack {
-                // 배경
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.black.opacity(0.3))
+                // 1) 원본 이미지 (고정, 약간 어둡게)
+                imageView
+                    .frame(width: previewSize, height: previewSize)
+                    .clipped()
+                    .overlay(Color.black.opacity(0.5))
 
-                // 이미지 프리뷰 (실제 결과와 동일하게 렌더링)
-                if case .image(let filename) = character.appearance,
-                   let nsImage = NSImage(contentsOf: CharacterStore.imagesDirectory.appendingPathComponent(filename)) {
-                    Image(nsImage: nsImage)
-                        .resizable()
-                        .scaledToFill()
-                        .scaleEffect(CGFloat(character.imageZoom))
-                        .offset(
-                            x: CGFloat(character.imageOffsetX) * previewSize * 0.3,
-                            y: CGFloat(character.imageOffsetY) * previewSize * 0.3
-                        )
-                        .frame(width: previewSize - 16, height: previewSize - 16)
-                        .mask(previewClipShape.frame(width: previewSize - 16, height: previewSize - 16))
-                }
+                // 2) 마스크 영역 안의 이미지 (밝게)
+                imageView
+                    .frame(width: previewSize, height: previewSize)
+                    .clipped()
+                    .mask(
+                        maskShapeView
+                            .frame(width: maskSize, height: maskSize)
+                            .position(maskCenter)
+                    )
 
-                // "드래그" 힌트
-                if character.imageOffsetX == 0 && character.imageOffsetY == 0 {
-                    Text("드래그하여 위치 조정")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.6))
-                }
+                // 3) 마스크 테두리
+                maskBorderView
+                    .frame(width: maskSize, height: maskSize)
+                    .position(maskCenter)
+
+                // 4) 리사이즈 핸들 (우하단)
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 10, height: 10)
+                    .shadow(radius: 2)
+                    .position(
+                        x: maskCenter.x + maskSize / 2 - 2,
+                        y: maskCenter.y + maskSize / 2 - 2
+                    )
+                    .gesture(resizeGesture)
             }
             .frame(width: previewSize, height: previewSize)
             .cornerRadius(8)
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        let sensitivity: CGFloat = 2.0 / previewSize
-                        let newX = dragStartOffset.x + Double(value.translation.width * sensitivity)
-                        let newY = dragStartOffset.y + Double(value.translation.height * sensitivity)
-                        character.imageOffsetX = max(-1, min(1, newX))
-                        character.imageOffsetY = max(-1, min(1, newY))
-                    }
-                    .onEnded { _ in
-                        dragStartOffset = (character.imageOffsetX, character.imageOffsetY)
-                    }
-            )
-            .onAppear {
-                dragStartOffset = (character.imageOffsetX, character.imageOffsetY)
-            }
+            .contentShape(Rectangle())
+            .gesture(moveGesture)
             .frame(maxWidth: .infinity, alignment: .center)
+            .onAppear { initFromModel() }
         }
     }
 
+    // MARK: - Image
+
     @ViewBuilder
-    private var previewClipShape: some View {
+    private var imageView: some View {
+        if case .image(let filename) = character.appearance,
+           let nsImage = NSImage(contentsOf: CharacterStore.imagesDirectory.appendingPathComponent(filename)) {
+            Image(nsImage: nsImage)
+                .resizable()
+                .scaledToFill()
+        } else {
+            Color.gray
+        }
+    }
+
+    // MARK: - Mask Shape
+
+    @ViewBuilder
+    private var maskShapeView: some View {
         switch character.imageShape {
-        case .none:
+        case .none, .square:
             Rectangle()
         case .circle:
             Circle()
         case .rounded:
-            RoundedRectangle(cornerRadius: (previewSize - 16) * 0.2)
-        case .square:
-            Rectangle()
+            RoundedRectangle(cornerRadius: maskSize * 0.2)
         case .star:
             StarShape(points: 5)
         }
+    }
+
+    @ViewBuilder
+    private var maskBorderView: some View {
+        switch character.imageShape {
+        case .none, .square:
+            Rectangle().stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+        case .circle:
+            Circle().stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+        case .rounded:
+            RoundedRectangle(cornerRadius: maskSize * 0.2).stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+        case .star:
+            StarShape(points: 5).stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+        }
+    }
+
+    // MARK: - Gestures
+
+    private var moveGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                if dragStart == .zero { dragStart = maskCenter }
+                let newX = dragStart.x + value.translation.width
+                let newY = dragStart.y + value.translation.height
+                let half = maskSize / 2
+                maskCenter.x = max(half, min(previewSize - half, newX))
+                maskCenter.y = max(half, min(previewSize - half, newY))
+                syncToModel()
+            }
+            .onEnded { _ in dragStart = .zero }
+    }
+
+    private var resizeGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                if resizeStart == 0 { resizeStart = maskSize }
+                // 대각선 드래그 → 크기 변경
+                let delta = (value.translation.width + value.translation.height) / 2
+                let newSize = max(30, min(previewSize, resizeStart + delta))
+                maskSize = newSize
+                // 마스크가 프리뷰 밖으로 나가지 않게 보정
+                let half = maskSize / 2
+                maskCenter.x = max(half, min(previewSize - half, maskCenter.x))
+                maskCenter.y = max(half, min(previewSize - half, maskCenter.y))
+                syncToModel()
+            }
+            .onEnded { _ in resizeStart = 0 }
+    }
+
+    // MARK: - Model Sync
+
+    /// 마스크 → 모델 값 변환
+    private func syncToModel() {
+        // zoom = 프리뷰 전체 / 마스크 크기
+        character.imageZoom = Double(previewSize / maskSize)
+        // offset = 마스크 중심이 프리뷰 중심에서 얼마나 벗어났는지 (-1~1)
+        let centerX = previewSize / 2
+        let centerY = previewSize / 2
+        character.imageOffsetX = Double((maskCenter.x - centerX) / (previewSize / 2)) * -1
+        character.imageOffsetY = Double((maskCenter.y - centerY) / (previewSize / 2)) * -1
+    }
+
+    /// 모델 → 마스크 초기값
+    private func initFromModel() {
+        guard !initialized else { return }
+        initialized = true
+        let zoom = CGFloat(max(1, character.imageZoom))
+        maskSize = previewSize / zoom
+        let centerX = previewSize / 2
+        let centerY = previewSize / 2
+        maskCenter = CGPoint(
+            x: centerX - CGFloat(character.imageOffsetX) * (previewSize / 2),
+            y: centerY - CGFloat(character.imageOffsetY) * (previewSize / 2)
+        )
     }
 }
