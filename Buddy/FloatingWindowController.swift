@@ -96,7 +96,7 @@ class FloatingWindowController {
 
         switch event.type {
         case .leftMouseDown:
-            if windowFrame.contains(mouseLocation) {
+            if window.isPointInCharacter(mouseLocation) {
                 // 롱프레스 타이머 시작
                 didLongPress = false
                 longPressTimer?.invalidate()
@@ -213,7 +213,7 @@ class FloatingWindowController {
         let mouseLocation = NSEvent.mouseLocation
         let windowFrame = window.frame
         let wasHovering = isHovering
-        isHovering = windowFrame.contains(mouseLocation)
+        isHovering = window.isPointInCharacter(mouseLocation)
 
         if isHovering && !wasHovering {
             onInteraction?(.hover)
