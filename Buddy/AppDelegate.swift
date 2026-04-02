@@ -256,8 +256,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // 1) 각 캐릭터 이동
         for (_, instance) in instances {
-            guard !instance.buddyState.isDragging else { continue }
-            instance.wanderEngine.tick(deltaTime: dt)
+            if instance.buddyState.isDragging {
+                // 드래그 중: 윈도우 위치를 엔진에 동기화 (충돌 판정용)
+                instance.wanderEngine.setPosition(instance.windowController.currentPosition())
+            } else {
+                instance.wanderEngine.tick(deltaTime: dt)
+            }
         }
 
         // 2) 캐릭터 간 충돌 처리
@@ -265,7 +269,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // 3) 위치 반영 + 눈 추적
         for (id, instance) in instances {
-            instance.windowController.moveTo(instance.wanderEngine.currentPosition)
+            if !instance.buddyState.isDragging {
+                instance.windowController.moveTo(instance.wanderEngine.currentPosition)
+            }
             updateLookDirection(for: id)
         }
     }
@@ -288,14 +294,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                 guard dist < minDist && dist > 0.01 else { continue }
 
-                // 겹친 만큼 서로 밀어냄
                 let overlap = minDist - dist
                 let nx = dx / dist
                 let ny = dy / dist
-                let push = overlap * 0.5 + 0.5  // 반반 + 약간의 여유
 
-                a.wanderEngine.applyForce(CGPoint(x: -nx * push, y: -ny * push))
-                b.wanderEngine.applyForce(CGPoint(x: nx * push, y: ny * push))
+                let aDragging = a.buddyState.isDragging
+                let bDragging = b.buddyState.isDragging
+
+                // 부드러운 밀어내기 (프레임당 30%씩 해소 → 자연스러운 애니메이션)
+                let pushStrength: CGFloat = 0.3
+                let push = overlap * pushStrength
+
+                if aDragging && !bDragging {
+                    // A가 드래그 중 → B만 밀려남
+                    b.wanderEngine.applyForce(CGPoint(x: nx * push * 2, y: ny * push * 2))
+                } else if bDragging && !aDragging {
+                    // B가 드래그 중 → A만 밀려남
+                    a.wanderEngine.applyForce(CGPoint(x: -nx * push * 2, y: -ny * push * 2))
+                } else {
+                    // 둘 다 자유 이동 → 반반 밀어냄
+                    a.wanderEngine.applyForce(CGPoint(x: -nx * push, y: -ny * push))
+                    b.wanderEngine.applyForce(CGPoint(x: nx * push, y: ny * push))
+                }
             }
         }
     }
