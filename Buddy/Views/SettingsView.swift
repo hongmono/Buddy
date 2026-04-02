@@ -67,6 +67,7 @@ struct SettingsView: View {
                 claudeFound = path != nil
             }
             onSettingsOpen?()
+            NSApp.activate(ignoringOtherApps: true)
         }
         .onDisappear {
             onSettingsClose?()
