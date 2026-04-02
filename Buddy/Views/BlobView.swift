@@ -195,6 +195,10 @@ struct BuddyContentView: View {
     var lookOffset: CGPoint = .zero
     var appearance: CharacterAppearance = .ghost
     var scale: Double = 1.0
+    var imageShape: ImageShape = .none
+    var imageZoom: Double = 1.0
+    var imageOffsetX: Double = 0
+    var imageOffsetY: Double = 0
 
     private var charWidth: CGFloat { 60 * CGFloat(scale) }
     private var charHeight: CGFloat { 70 * CGFloat(scale) }
@@ -235,14 +239,65 @@ struct BuddyContentView: View {
             if let nsImage = NSImage(contentsOf: url) {
                 Image(nsImage: nsImage)
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
+                    .scaleEffect(CGFloat(imageZoom))
+                    .offset(
+                        x: CGFloat(imageOffsetX) * charWidth * 0.5,
+                        y: CGFloat(imageOffsetY) * charHeight * 0.5
+                    )
                     .frame(width: charWidth, height: charHeight)
+                    .mask(imageClipShape.frame(width: charWidth, height: charHeight))
             } else {
                 BlobView(emotion: emotion, lookOffset: lookOffset)
                     .scaleEffect(CGFloat(scale))
                     .frame(width: charWidth, height: charHeight)
             }
         }
+    }
+
+    @ViewBuilder
+    private var imageClipShape: some View {
+        switch imageShape {
+        case .none:
+            Rectangle()
+        case .circle:
+            Circle()
+        case .rounded:
+            RoundedRectangle(cornerRadius: charWidth * 0.2)
+        case .square:
+            Rectangle()
+        case .star:
+            StarShape(points: 5)
+        }
+    }
+}
+
+/// 별 모양 Shape
+struct StarShape: Shape {
+    let points: Int
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let outerRadius = min(rect.width, rect.height) / 2
+        let innerRadius = outerRadius * 0.4
+        let totalPoints = points * 2
+
+        var path = Path()
+        for i in 0..<totalPoints {
+            let angle = CGFloat(i) * .pi / CGFloat(points) - .pi / 2
+            let radius = i % 2 == 0 ? outerRadius : innerRadius
+            let point = CGPoint(
+                x: center.x + cos(angle) * radius,
+                y: center.y + sin(angle) * radius
+            )
+            if i == 0 {
+                path.move(to: point)
+            } else {
+                path.addLine(to: point)
+            }
+        }
+        path.closeSubpath()
+        return path
     }
 }
 

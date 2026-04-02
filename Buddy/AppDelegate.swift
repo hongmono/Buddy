@@ -68,7 +68,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let windowController = FloatingWindowController(scale: CGFloat(character.scale))
         windowController.window.characterScale = CGFloat(character.scale)
         let buddyState = BuddyState()
-        windowController.setContent(BuddyContentView(emotion: buddyState.emotion, bubbleText: nil, appearance: character.appearance, scale: character.scale))
+        windowController.setContent(BuddyContentView(
+            emotion: buddyState.emotion,
+            bubbleText: nil,
+            appearance: character.appearance,
+            scale: character.scale,
+            imageShape: character.imageShape,
+            imageZoom: character.imageZoom,
+            imageOffsetX: character.imageOffsetX,
+            imageOffsetY: character.imageOffsetY
+        ))
         windowController.setupEventHandling()
 
         let characterID = character.id
@@ -344,12 +353,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // 뷰 업데이트 (말풍선 없을 때만 매 프레임 갱신, 있으면 showBubble이 처리)
         if instance.buddyState.currentBubbleText == nil {
+            let char = instance.character
             let content = BuddyContentView(
                 emotion: instance.buddyState.emotion,
                 bubbleText: nil,
                 lookOffset: instance.currentLookOffset,
-                appearance: instance.character.appearance,
-                scale: instance.character.scale
+                appearance: char.appearance,
+                scale: char.scale,
+                imageShape: char.imageShape,
+                imageZoom: char.imageZoom,
+                imageOffsetX: char.imageOffsetX,
+                imageOffsetY: char.imageOffsetY
             )
             instance.windowController.setContent(content)
         }
@@ -381,12 +395,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateBlobView(for id: UUID) {
         guard let instance = instances[id] else { return }
+        let char = instance.character
         let content = BuddyContentView(
             emotion: instance.buddyState.emotion,
             bubbleText: instance.buddyState.currentBubbleText,
             lookOffset: instance.currentLookOffset,
-            appearance: instance.character.appearance,
-            scale: instance.character.scale
+            appearance: char.appearance,
+            scale: char.scale,
+            imageShape: char.imageShape,
+            imageZoom: char.imageZoom,
+            imageOffsetX: char.imageOffsetX,
+            imageOffsetY: char.imageOffsetY
         )
         instance.windowController.setContent(content)
     }

@@ -58,6 +58,49 @@ struct CharacterEditInlineView: View {
                 }
             }
 
+            // PNG 이미지 옵션 (이미지일 때만 표시)
+            if case .image = character.appearance {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("이미지 모양")
+                    HStack(spacing: 4) {
+                        ForEach(ImageShape.allCases, id: \.rawValue) { shape in
+                            Button {
+                                character.imageShape = shape
+                            } label: {
+                                Text(shape.displayName)
+                                    .font(.caption2)
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(character.imageShape == shape ? Color.accentColor.opacity(0.3) : Color.gray.opacity(0.15))
+                                    .cornerRadius(3)
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                }
+
+                HStack {
+                    Text("줌")
+                        .frame(width: 40, alignment: .leading)
+                    Slider(value: $character.imageZoom, in: 1.0...3.0, step: 0.1)
+                    Text("\(String(format: "%.1f", character.imageZoom))x")
+                        .frame(width: 35)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack {
+                    Text("위치X")
+                        .frame(width: 40, alignment: .leading)
+                    Slider(value: $character.imageOffsetX, in: -1.0...1.0, step: 0.05)
+                }
+
+                HStack {
+                    Text("위치Y")
+                        .frame(width: 40, alignment: .leading)
+                    Slider(value: $character.imageOffsetY, in: -1.0...1.0, step: 0.05)
+                }
+            }
+
             HStack {
                 Spacer()
                 Button("저장") {
