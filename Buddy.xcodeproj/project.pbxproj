@@ -33,6 +33,7 @@
 		D1BE30B12C1ECAA6523F2187 /* AIServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 916324EC5E9502D693EEBDBC /* AIServiceTests.swift */; };
 		D68109C8EEF80DCE79F3851B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49AFE6D53C6A50F4D02FD7DB /* SettingsView.swift */; };
 		D87251635B86D7D0F96FEEF2 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */; };
+		EA9DA5E48B7A49F6CAAD790A /* MovementProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2065A920E221E771314BFD72 /* MovementProfile.swift */; };
 		EFB48CD0CA329D03E4AAD419 /* BuddyStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */; };
 		F80861B8F7CFCB9DAA59EE19 /* BlobView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73149E500B8BB5EF6EE6A6DC /* BlobView.swift */; };
 /* End PBXBuildFile section */
@@ -50,6 +51,7 @@
 /* Begin PBXFileReference section */
 		03F0ED93CB66E71A62194659 /* Emotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emotion.swift; sourceTree = "<group>"; };
 		16C314DCE9562BBB69F0D96B /* FloatingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingWindowController.swift; sourceTree = "<group>"; };
+		2065A920E221E771314BFD72 /* MovementProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementProfile.swift; sourceTree = "<group>"; };
 		2E91054348EAB571A8B9FC0D /* CharacterListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterListView.swift; sourceTree = "<group>"; };
 		384DC498D28155A01747C6FA /* SpeechBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBubbleView.swift; sourceTree = "<group>"; };
 		42E7DAFB04F764070992A7F2 /* CloudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudView.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				5104F45DDE3BC9D0E1CE4F5F /* ContextSensor.swift */,
+				2065A920E221E771314BFD72 /* MovementProfile.swift */,
 				F06740799CB1A9410BEDC19A /* WanderEngine.swift */,
 			);
 			path = Engine;
@@ -277,6 +280,7 @@
 				C08F6759D0918A4AFC0D7BD6 /* FloatingWindow.swift in Sources */,
 				70DB2B7499F6096B4F78167D /* FloatingWindowController.swift in Sources */,
 				C8CE33C01B33849524452874 /* KeychainHelper.swift in Sources */,
+				EA9DA5E48B7A49F6CAAD790A /* MovementProfile.swift in Sources */,
 				D68109C8EEF80DCE79F3851B /* SettingsView.swift in Sources */,
 				3C4F11136D3C221497FAB47C /* ShellEnvironment.swift in Sources */,
 				AE93337798915FC39DC7FF13 /* SlimeView.swift in Sources */,

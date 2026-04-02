@@ -82,7 +82,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let windowSize = windowController.window.frame.size
         let wanderEngine = WanderEngine(
             screenBounds: screen,
-            characterSize: windowSize
+            characterSize: windowSize,
+            profile: character.appearance.movementProfile
         )
 
         let instance = CharacterInstance(
