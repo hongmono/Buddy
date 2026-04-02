@@ -476,55 +476,94 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // 사용자 메시지 표시
         instance.chatWindowController?.addMessage(ChatMessage(role: .user, content: text))
 
-        let characterNames = characterStore.characters.map { $0.name }
+        // 1) 문자열 매칭으로 명령어 먼저 체크 (AI 불필요)
+        let names = characterStore.characters.map { $0.name }
+        if let parsed = Self.parseCommand(text, characterNames: names) {
+            executeCommand(parsed.command, for: id, targetName: parsed.targetName)
+            let reaction = parsed.command.reaction
+            instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: reaction.text))
+            showBubble(text: reaction.text, emotion: reaction.emotion, for: id)
+            return
+        }
 
-        // Apple Intelligence로 의도 분석
+        // 2) 명령이 아니면 AI로 대화
+        //    우선순위: Apple Intelligence → Claude CLI → fallback
         if #available(macOS 26.0, *), let onDeviceAI = instance.onDeviceAI as? OnDeviceAIService {
             Task { @MainActor in
-                let result = await onDeviceAI.analyzeIntent(text)
-
-                switch result {
-                case .command(let command, let targetName, let reaction):
-                    // 명령 실행
-                    self.executeCommand(command, for: id, targetName: targetName)
-                    let response = reaction ?? command.reaction.text
+                // Apple AI로 간단 응답 시도
+                if let response = await onDeviceAI.generateSimpleResponse(text) {
                     instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: response))
-                    self.showBubble(text: response, emotion: command.reaction.emotion, for: id)
-
-                case .chat(let needsComplexAI, let simpleResponse):
-                    if needsComplexAI && instance.aiService.isRunning {
-                        // Claude CLI로 전달
-                        instance.aiService.chat(message: text) { [weak self] response in
-                            DispatchQueue.main.async {
-                                let reply = response ?? "음... 잘 모르겠어"
-                                instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: reply))
-                                self?.showBubble(text: String(reply.prefix(50)), emotion: .idle, for: id)
-                            }
-                        }
-                    } else if let response = simpleResponse {
-                        // Apple AI 응답
-                        instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: response))
-                        self.showBubble(text: String(response.prefix(50)), emotion: .happy, for: id)
-                    } else {
-                        // 둘 다 안 되면 fallback
-                        let fallback = "흐음... 잘 모르겠어~ 😅"
-                        instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: fallback))
-                    }
+                    self.showBubble(text: String(response.prefix(50)), emotion: .happy, for: id)
+                } else if instance.aiService.isRunning {
+                    // Apple AI 실패 → Claude CLI
+                    self.chatWithClaude(text, for: id)
+                } else {
+                    instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: "흐음... 잘 모르겠어~ 😅"))
                 }
             }
         } else if instance.aiService.isRunning {
-            // Apple AI 없으면 Claude CLI 직접
-            instance.aiService.chat(message: text) { [weak self] response in
-                DispatchQueue.main.async {
-                    let reply = response ?? "음... 잘 모르겠어"
-                    instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: reply))
-                    self?.showBubble(text: String(reply.prefix(50)), emotion: .idle, for: id)
-                }
-            }
+            chatWithClaude(text, for: id)
         } else {
-            let fallback = "아직 AI가 연결 안 됐어~ 명령어는 사용할 수 있어!"
-            instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: fallback))
+            instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: "AI가 연결 안 됐어~ 명령어는 사용할 수 있어!"))
         }
+    }
+
+    private func chatWithClaude(_ text: String, for id: UUID) {
+        guard let instance = instances[id] else { return }
+        instance.aiService.chat(message: text) { [weak self] response in
+            DispatchQueue.main.async {
+                let reply = response ?? "음... 잘 모르겠어"
+                instance.chatWindowController?.addMessage(ChatMessage(role: .assistant, content: reply))
+                self?.showBubble(text: String(reply.prefix(50)), emotion: .idle, for: id)
+            }
+        }
+    }
+
+    /// 문자열 매칭 명령어 파서
+    static func parseCommand(_ text: String, characterNames: [String]) -> (command: BuddyCommand, targetName: String?)? {
+        let t = text.trimmingCharacters(in: .whitespaces)
+        let lower = t.lowercased()
+
+        // 멀티 캐릭터
+        if lower.contains("모여") || lower.contains("모이") || lower.contains("집합") {
+            return (.gather, nil)
+        }
+        if lower.contains("흩어") || lower.contains("해산") {
+            return (.scatter, nil)
+        }
+        // "[이름]한테 가"
+        for name in characterNames {
+            let n = name.lowercased()
+            if lower.contains("\(n)한테 가") || lower.contains("\(n)에게 가") ||
+               lower.contains("\(n)한테가") || lower.contains("\(n) 한테 가") {
+                return (.goToCharacter, name)
+            }
+        }
+
+        // 단일 명령
+        if lower.contains("이리") || lower.contains("이쪽") || lower.contains("와봐") || lower.contains("come") {
+            return (.comeHere, nil)
+        }
+        if lower.contains("저리") || lower.contains("가버") || lower.contains("꺼져") {
+            return (.goAway, nil)
+        }
+        if lower == "멈" || lower == "멈춰" || lower.contains("멈춰") || lower.contains("그만") || lower == "stop" {
+            return (.stop, nil)
+        }
+        if lower.contains("돌아다") || lower.contains("움직여") || lower.contains("자유") {
+            return (.wander, nil)
+        }
+        if lower == "자" || lower == "자!" || lower.contains("잠자") || lower == "sleep" {
+            return (.sleep, nil)
+        }
+        if lower.contains("일어나") || lower.contains("깨어") || lower.contains("기상") {
+            return (.wakeUp, nil)
+        }
+        if lower.contains("춤") || lower.contains("dance") || lower.contains("댄스") {
+            return (.dance, nil)
+        }
+
+        return nil
     }
 
     // MARK: - Command Execution
