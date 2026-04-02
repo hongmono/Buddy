@@ -3,8 +3,7 @@ import SwiftUI
 
 struct CharacterListView: View {
     @ObservedObject var store: CharacterStore
-    @State private var selectedCharacter: BuddyCharacter?
-    @State private var showingEdit = false
+    @State private var editingCharacterId: UUID?
 
     var onCharacterAdded: ((BuddyCharacter) -> Void)?
     var onCharacterRemoved: ((UUID) -> Void)?
@@ -13,26 +12,44 @@ struct CharacterListView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(store.characters) { character in
-                HStack {
-                    characterIcon(character)
-                    Text(character.name)
-                    Spacer()
-                    Button("편집") {
-                        selectedCharacter = character
-                        showingEdit = true
-                    }
-                    .buttonStyle(.borderless)
-                    if store.characters.count > 1 {
-                        Button(role: .destructive) {
-                            store.remove(id: character.id)
-                            onCharacterRemoved?(character.id)
-                        } label: {
-                            Image(systemName: "trash")
+                VStack(spacing: 0) {
+                    HStack {
+                        characterIcon(character)
+                        Text(character.name)
+                        Spacer()
+                        Button(editingCharacterId == character.id ? "닫기" : "편집") {
+                            withAnimation {
+                                if editingCharacterId == character.id {
+                                    editingCharacterId = nil
+                                } else {
+                                    editingCharacterId = character.id
+                                }
+                            }
                         }
                         .buttonStyle(.borderless)
+                        if store.characters.count > 1 {
+                            Button(role: .destructive) {
+                                store.remove(id: character.id)
+                                onCharacterRemoved?(character.id)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                    .padding(.vertical, 2)
+
+                    if editingCharacterId == character.id {
+                        CharacterEditInlineView(
+                            character: character,
+                            store: store
+                        ) { updated in
+                            onCharacterUpdated?(updated)
+                            editingCharacterId = nil
+                        }
+                        .padding(.top, 4)
                     }
                 }
-                .padding(.vertical, 2)
             }
 
             if store.characters.count < CharacterStore.maxCharacters {
@@ -44,16 +61,6 @@ struct CharacterListView: View {
                     Label("캐릭터 추가", systemImage: "plus")
                 }
                 .padding(.top, 4)
-            }
-        }
-        .sheet(isPresented: $showingEdit) {
-            if let char = selectedCharacter {
-                CharacterEditView(character: char, store: store, onSave: { updated in
-                    onCharacterUpdated?(updated)
-                    showingEdit = false
-                }, onDismiss: {
-                    showingEdit = false
-                })
             }
         }
     }

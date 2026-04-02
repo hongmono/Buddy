@@ -2,58 +2,64 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct CharacterEditView: View {
+struct CharacterEditInlineView: View {
     @State var character: BuddyCharacter
     let store: CharacterStore
     var onSave: (BuddyCharacter) -> Void
-    var onDismiss: (() -> Void)?
 
     @State private var showingImagePicker = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text("캐릭터 편집")
-                .font(.headline)
-
-            Form {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("이름")
+                    .frame(width: 40, alignment: .leading)
                 TextField("이름", text: $character.name)
-                TextField("성격", text: $character.personality)
-
-                HStack {
-                    Text("외형")
-                    Spacer()
-                    switch character.appearance {
-                    case .ghost:
-                        Text("기본 유령 👻")
-                    case .image:
-                        Text("커스텀 이미지")
-                    }
-                }
-
-                HStack {
-                    Button("기본 유령으로") {
-                        character.appearance = .ghost
-                    }
-                    Button("PNG 이미지 선택...") {
-                        showingImagePicker = true
-                    }
-                }
+                    .textFieldStyle(.roundedBorder)
             }
 
             HStack {
-                Button("취소") {
-                    onDismiss?()
+                Text("성격")
+                    .frame(width: 40, alignment: .leading)
+                TextField("성격", text: $character.personality)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            HStack {
+                Text("외형")
+                    .frame(width: 40, alignment: .leading)
+                switch character.appearance {
+                case .ghost:
+                    Text("기본 유령 👻")
+                        .foregroundColor(.secondary)
+                case .image:
+                    Text("커스텀 이미지")
+                        .foregroundColor(.secondary)
                 }
+                Spacer()
+                Button("유령") {
+                    character.appearance = .ghost
+                }
+                .buttonStyle(.borderless)
+                Button("PNG 선택...") {
+                    showingImagePicker = true
+                }
+                .buttonStyle(.borderless)
+            }
+
+            HStack {
                 Spacer()
                 Button("저장") {
                     store.update(character)
                     onSave(character)
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.small)
             }
         }
-        .padding()
-        .frame(width: 350, height: 280)
+        .padding(8)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(6)
         .fileImporter(
             isPresented: $showingImagePicker,
             allowedContentTypes: [.png],

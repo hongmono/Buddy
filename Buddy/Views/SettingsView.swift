@@ -59,7 +59,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 350, height: 450)
+        .frame(width: 380, height: 500)
         .onAppear {
             AIService.findClaude { path in
                 claudeFound = path != nil
