@@ -34,26 +34,28 @@ struct CharacterEditInlineView: View {
                     .foregroundColor(.secondary)
             }
 
-            HStack {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("외형")
-                    .frame(width: 40, alignment: .leading)
-                switch character.appearance {
-                case .ghost:
-                    Text("기본 유령 👻")
-                        .foregroundColor(.secondary)
-                case .image:
-                    Text("커스텀 이미지")
-                        .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    ForEach(CharacterAppearance.builtinCases, id: \.displayName) { appearance in
+                        Button {
+                            character.appearance = appearance
+                        } label: {
+                            Text(appearance.displayName)
+                                .font(.caption)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(character.appearance == appearance ? Color.accentColor.opacity(0.3) : Color.gray.opacity(0.15))
+                                .cornerRadius(4)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                    Button("PNG...") {
+                        showingImagePicker = true
+                    }
+                    .font(.caption)
+                    .buttonStyle(.borderless)
                 }
-                Spacer()
-                Button("유령") {
-                    character.appearance = .ghost
-                }
-                .buttonStyle(.borderless)
-                Button("PNG 선택...") {
-                    showingImagePicker = true
-                }
-                .buttonStyle(.borderless)
             }
 
             HStack {

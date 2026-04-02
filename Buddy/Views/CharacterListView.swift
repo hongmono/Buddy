@@ -69,8 +69,13 @@ struct CharacterListView: View {
     private func characterIcon(_ character: BuddyCharacter) -> some View {
         switch character.appearance {
         case .ghost:
-            Image(systemName: "ghost.fill")
-                .foregroundColor(.cyan)
+            Text("👻").font(.caption)
+        case .cat:
+            Text("🐱").font(.caption)
+        case .slime:
+            Text("🟢").font(.caption)
+        case .cloud:
+            Text("☁️").font(.caption)
         case .image(let filename):
             let url = CharacterStore.imagesDirectory.appendingPathComponent(filename)
             if let nsImage = NSImage(contentsOf: url) {

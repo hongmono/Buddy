@@ -2,8 +2,24 @@
 import Foundation
 
 enum CharacterAppearance: Codable, Equatable {
-    case ghost          // 기본 SwiftUI 유령
+    case ghost          // 유령
+    case cat            // 고양이
+    case slime          // 슬라임
+    case cloud          // 구름
     case image(String)  // PNG 파일 경로 (App Support 내 상대경로)
+
+    /// 빌트인 캐릭터 목록
+    static let builtinCases: [CharacterAppearance] = [.ghost, .cat, .slime, .cloud]
+
+    var displayName: String {
+        switch self {
+        case .ghost: return "유령 👻"
+        case .cat: return "고양이 🐱"
+        case .slime: return "슬라임 🟢"
+        case .cloud: return "구름 ☁️"
+        case .image: return "커스텀 이미지"
+        }
+    }
 }
 
 struct BuddyCharacter: Codable, Identifiable, Equatable {

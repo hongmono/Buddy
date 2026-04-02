@@ -218,6 +218,18 @@ struct BuddyContentView: View {
             BlobView(emotion: emotion, lookOffset: lookOffset)
                 .scaleEffect(CGFloat(scale))
                 .frame(width: charWidth, height: charHeight)
+        case .cat:
+            CatView(emotion: emotion, lookOffset: lookOffset)
+                .scaleEffect(CGFloat(scale))
+                .frame(width: charWidth, height: charHeight)
+        case .slime:
+            SlimeView(emotion: emotion, lookOffset: lookOffset)
+                .scaleEffect(CGFloat(scale))
+                .frame(width: charWidth, height: charHeight)
+        case .cloud:
+            CloudView(emotion: emotion, lookOffset: lookOffset)
+                .scaleEffect(CGFloat(scale))
+                .frame(width: charWidth, height: charHeight)
         case .image(let filename):
             let url = CharacterStore.imagesDirectory.appendingPathComponent(filename)
             if let nsImage = NSImage(contentsOf: url) {
