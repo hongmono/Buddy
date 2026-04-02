@@ -3,17 +3,24 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
-    @AppStorage("buddyName") private var buddyName: String = "Buddy"
+    @ObservedObject var characterStore: CharacterStore
     @AppStorage("bubbleFrequency") private var bubbleFrequency: Double = 10
-    @AppStorage("wanderEnabled") private var wanderEnabled: Bool = true
     @State private var launchAtLogin: Bool = false
     @State private var claudeFound: Bool = false
+
+    var onCharacterAdded: ((BuddyCharacter) -> Void)?
+    var onCharacterRemoved: ((UUID) -> Void)?
+    var onCharacterUpdated: ((BuddyCharacter) -> Void)?
 
     var body: some View {
         Form {
             Section("캐릭터") {
-                TextField("이름", text: $buddyName)
-                Toggle("화면 이동", isOn: $wanderEnabled)
+                CharacterListView(
+                    store: characterStore,
+                    onCharacterAdded: onCharacterAdded,
+                    onCharacterRemoved: onCharacterRemoved,
+                    onCharacterUpdated: onCharacterUpdated
+                )
             }
 
             Section("AI") {
@@ -52,7 +59,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 350, height: 350)
+        .frame(width: 350, height: 450)
         .onAppear {
             AIService.findClaude { path in
                 claudeFound = path != nil

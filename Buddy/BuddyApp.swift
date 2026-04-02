@@ -19,7 +19,19 @@ struct BuddyApp: App {
         }
 
         Settings {
-            SettingsView()
+            SettingsView(
+                characterStore: appDelegate.characterStore,
+                onCharacterAdded: { character in
+                    appDelegate.spawnCharacter(character)
+                },
+                onCharacterRemoved: { id in
+                    appDelegate.despawnCharacter(id: id)
+                },
+                onCharacterUpdated: { character in
+                    appDelegate.despawnCharacter(id: character.id)
+                    appDelegate.spawnCharacter(character)
+                }
+            )
         }
     }
 }
