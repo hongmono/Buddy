@@ -18,9 +18,11 @@
 		946A7043E52922E3F4F0A4A7 /* ContextSensorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84378F64149EAF5E286E5625 /* ContextSensorTests.swift */; };
 		A10F2AB33F485ADD17AF71DC /* WanderEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6434CA1B25659D0239C1821D /* WanderEngineTests.swift */; };
 		A3FDF39B9637153DB846CF0C /* BuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8115D93E2F6808644D4BFA /* BuddyApp.swift */; };
+		A54CB9B91DE2C09C948D4B3A /* BuddyCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9761F8A1ADFFBD65ECC7B37F /* BuddyCharacter.swift */; };
 		BD44D4E0CC9DD15CAFA23825 /* Emotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F0ED93CB66E71A62194659 /* Emotion.swift */; };
 		C08F6759D0918A4AFC0D7BD6 /* FloatingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C39F138018E6C458CF612C2 /* FloatingWindow.swift */; };
 		C3ADFBC1213B3385A116E052 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00CBB24A4ADAC80FE6FDB52 /* AIService.swift */; };
+		C7E119B4EF9CB230E92E0726 /* CharacterStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21D182EEA914406C163709 /* CharacterStore.swift */; };
 		C8CE33C01B33849524452874 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C485BE7AD6049572479FC68F /* KeychainHelper.swift */; };
 		CC4F12735D320C13B8BC9505 /* SpeechBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 384DC498D28155A01747C6FA /* SpeechBubbleView.swift */; };
 		D1BE30B12C1ECAA6523F2187 /* AIServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 916324EC5E9502D693EEBDBC /* AIServiceTests.swift */; };
@@ -54,11 +56,13 @@
 		916324EC5E9502D693EEBDBC /* AIServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceTests.swift; sourceTree = "<group>"; };
 		93624F720A7967EC5C0A3CDB /* BuddyStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyStateTests.swift; sourceTree = "<group>"; };
 		93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		9761F8A1ADFFBD65ECC7B37F /* BuddyCharacter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyCharacter.swift; sourceTree = "<group>"; };
 		A556DCDA3181F7F72C7A6427 /* BuddyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyState.swift; sourceTree = "<group>"; };
 		B62ADAFAFF48938BEF43E220 /* BuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB56600BB09F0FE1EA308013 /* ShellEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellEnvironment.swift; sourceTree = "<group>"; };
 		BE7D6BE8EAAA4FFF8F3DC6F5 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		C485BE7AD6049572479FC68F /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		DA21D182EEA914406C163709 /* CharacterStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterStore.swift; sourceTree = "<group>"; };
 		DF502F8FB886FB3716DB4674 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ED8115D93E2F6808644D4BFA /* BuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuddyApp.swift; sourceTree = "<group>"; };
 		F00CBB24A4ADAC80FE6FDB52 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
@@ -136,7 +140,9 @@
 		DA42F27D81A625BCEEF226A7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				9761F8A1ADFFBD65ECC7B37F /* BuddyCharacter.swift */,
 				A556DCDA3181F7F72C7A6427 /* BuddyState.swift */,
+				DA21D182EEA914406C163709 /* CharacterStore.swift */,
 				93C3DA65F05ECDBB080C6CE4 /* ChatMessage.swift */,
 				03F0ED93CB66E71A62194659 /* Emotion.swift */,
 			);
@@ -241,7 +247,9 @@
 				6013DB13A68311B8503872C0 /* AppDelegate.swift in Sources */,
 				F80861B8F7CFCB9DAA59EE19 /* BlobView.swift in Sources */,
 				A3FDF39B9637153DB846CF0C /* BuddyApp.swift in Sources */,
+				A54CB9B91DE2C09C948D4B3A /* BuddyCharacter.swift in Sources */,
 				0A9D20C82FBBBA7C7883528A /* BuddyState.swift in Sources */,
+				C7E119B4EF9CB230E92E0726 /* CharacterStore.swift in Sources */,
 				D87251635B86D7D0F96FEEF2 /* ChatMessage.swift in Sources */,
 				14F719C0949759B9993A74EC /* ChatView.swift in Sources */,
 				8FE88F6BE91E4D76194EEA5D /* ChatWindowController.swift in Sources */,
