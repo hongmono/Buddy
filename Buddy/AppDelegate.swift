@@ -252,12 +252,51 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Tick
 
     private func tick() {
-        for (id, instance) in instances {
+        let dt: CGFloat = 1.0 / 60.0
+
+        // 1) 각 캐릭터 이동
+        for (_, instance) in instances {
             guard !instance.buddyState.isDragging else { continue }
-            instance.wanderEngine.tick(deltaTime: 1.0 / 60.0)
-            let pos = instance.wanderEngine.currentPosition
-            instance.windowController.moveTo(pos)
+            instance.wanderEngine.tick(deltaTime: dt)
+        }
+
+        // 2) 캐릭터 간 충돌 처리
+        resolveCollisions()
+
+        // 3) 위치 반영 + 눈 추적
+        for (id, instance) in instances {
+            instance.windowController.moveTo(instance.wanderEngine.currentPosition)
             updateLookDirection(for: id)
+        }
+    }
+
+    private func resolveCollisions() {
+        let ids = Array(instances.keys)
+        guard ids.count > 1 else { return }
+
+        for i in 0..<ids.count {
+            for j in (i + 1)..<ids.count {
+                guard let a = instances[ids[i]], let b = instances[ids[j]] else { continue }
+
+                let centerA = a.wanderEngine.center
+                let centerB = b.wanderEngine.center
+                let minDist = a.wanderEngine.collisionRadius + b.wanderEngine.collisionRadius
+
+                let dx = centerB.x - centerA.x
+                let dy = centerB.y - centerA.y
+                let dist = sqrt(dx * dx + dy * dy)
+
+                guard dist < minDist && dist > 0.01 else { continue }
+
+                // 겹친 만큼 서로 밀어냄
+                let overlap = minDist - dist
+                let nx = dx / dist
+                let ny = dy / dist
+                let push = overlap * 0.5 + 0.5  // 반반 + 약간의 여유
+
+                a.wanderEngine.applyForce(CGPoint(x: -nx * push, y: -ny * push))
+                b.wanderEngine.applyForce(CGPoint(x: nx * push, y: ny * push))
+            }
         }
     }
 

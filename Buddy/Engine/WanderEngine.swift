@@ -152,6 +152,33 @@ struct WanderEngine {
         basePosition = point
     }
 
+    /// 외부 힘 적용 (충돌 반발 등)
+    mutating func applyForce(_ force: CGPoint) {
+        basePosition.x += force.x
+        basePosition.y += force.y
+
+        // 경계 클램프
+        let minX = screenBounds.minX
+        let minY = screenBounds.minY
+        let maxX = screenBounds.maxX - characterSize.width
+        let maxY = screenBounds.maxY - characterSize.height
+        basePosition.x = max(minX, min(maxX, basePosition.x))
+        basePosition.y = max(minY, min(maxY, basePosition.y))
+    }
+
+    /// 캐릭터 중심점
+    var center: CGPoint {
+        CGPoint(
+            x: basePosition.x + characterSize.width / 2,
+            y: basePosition.y + characterSize.height / 2
+        )
+    }
+
+    /// 충돌 반경
+    var collisionRadius: CGFloat {
+        min(characterSize.width, characterSize.height) * 0.4
+    }
+
     // MARK: - Internal
 
     private mutating func nudgeDirection() {
