@@ -3,7 +3,7 @@ import AppKit
 import SwiftUI
 
 class CharacterInstance {
-    let character: BuddyCharacter
+    var character: BuddyCharacter
     var windowController: FloatingWindowController
     var wanderEngine: WanderEngine
     var buddyState: BuddyState
@@ -95,11 +95,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         instances[character.id] = instance
     }
 
-    func setCharacterWindowsFloating(_ floating: Bool) {
-        let level: NSWindow.Level = floating ? .floating : .normal
-        for (_, instance) in instances {
-            instance.windowController.window.level = level
+    func updateCharacter(_ character: BuddyCharacter) {
+        guard let instance = instances[character.id] else { return }
+        instance.character = character
+        instance.windowController.window.characterScale = CGFloat(character.scale)
+        // AI 성격이 바뀌었으면 재시작
+        instance.aiService.stop()
+        let newAI = AIService(name: character.name, personality: character.personality)
+        newAI.start { success in
+            print("\(character.name) AI reconnected: \(success)")
         }
+        instance.aiService = newAI
+        // 뷰 업데이트 (애니메이션)
+        updateBlobView(for: character.id)
     }
 
     func despawnCharacter(id: UUID) {

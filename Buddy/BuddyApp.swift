@@ -28,14 +28,7 @@ struct BuddyApp: App {
                     appDelegate.despawnCharacter(id: id)
                 },
                 onCharacterUpdated: { character in
-                    appDelegate.despawnCharacter(id: character.id)
-                    appDelegate.spawnCharacter(character)
-                },
-                onSettingsOpen: {
-                    appDelegate.setCharacterWindowsFloating(false)
-                },
-                onSettingsClose: {
-                    appDelegate.setCharacterWindowsFloating(true)
+                    appDelegate.updateCharacter(character)
                 }
             )
         }
