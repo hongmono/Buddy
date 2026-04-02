@@ -19,10 +19,13 @@ class FloatingWindow: NSWindow {
         self.isMovableByWindowBackground = false
     }
 
+    /// 캐릭터 스케일 (외부에서 설정)
+    var characterScale: CGFloat = 1.0
+
     /// 캐릭터 본체 영역 (윈도우 좌표 기준, 하단 중앙)
     var characterHitRect: NSRect {
-        let charWidth: CGFloat = 80
-        let charHeight: CGFloat = 90
+        let charWidth: CGFloat = 80 * characterScale
+        let charHeight: CGFloat = 90 * characterScale
         let frameW = frame.width
         return NSRect(
             x: (frameW - charWidth) / 2,

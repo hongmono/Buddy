@@ -194,6 +194,10 @@ struct BuddyContentView: View {
     let bubbleText: String?
     var lookOffset: CGPoint = .zero
     var appearance: CharacterAppearance = .ghost
+    var scale: Double = 1.0
+
+    private var charWidth: CGFloat { 60 * CGFloat(scale) }
+    private var charHeight: CGFloat { 70 * CGFloat(scale) }
 
     var body: some View {
         VStack(spacing: 4) {
@@ -204,7 +208,7 @@ struct BuddyContentView: View {
             }
             characterView
         }
-        .frame(maxWidth: 300, maxHeight: 200, alignment: .bottom)
+        .frame(maxWidth: 300, maxHeight: max(200, charHeight + 130), alignment: .bottom)
     }
 
     @ViewBuilder
@@ -212,15 +216,19 @@ struct BuddyContentView: View {
         switch appearance {
         case .ghost:
             BlobView(emotion: emotion, lookOffset: lookOffset)
+                .scaleEffect(CGFloat(scale))
+                .frame(width: charWidth, height: charHeight)
         case .image(let filename):
             let url = CharacterStore.imagesDirectory.appendingPathComponent(filename)
             if let nsImage = NSImage(contentsOf: url) {
                 Image(nsImage: nsImage)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 60, height: 70)
+                    .frame(width: charWidth, height: charHeight)
             } else {
                 BlobView(emotion: emotion, lookOffset: lookOffset)
+                    .scaleEffect(CGFloat(scale))
+                    .frame(width: charWidth, height: charHeight)
             }
         }
     }

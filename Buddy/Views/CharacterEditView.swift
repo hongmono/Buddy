@@ -26,6 +26,15 @@ struct CharacterEditInlineView: View {
             }
 
             HStack {
+                Text("크기")
+                    .frame(width: 40, alignment: .leading)
+                Slider(value: $character.scale, in: 0.5...3.0, step: 0.1)
+                Text("\(String(format: "%.1f", character.scale))x")
+                    .frame(width: 35)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
                 Text("외형")
                     .frame(width: 40, alignment: .leading)
                 switch character.appearance {

@@ -66,8 +66,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let windowController = FloatingWindowController()
+        windowController.window.characterScale = CGFloat(character.scale)
         let buddyState = BuddyState()
-        windowController.setContent(BuddyContentView(emotion: buddyState.emotion, bubbleText: nil, appearance: character.appearance))
+        windowController.setContent(BuddyContentView(emotion: buddyState.emotion, bubbleText: nil, appearance: character.appearance, scale: character.scale))
         windowController.setupEventHandling()
 
         let characterID = character.id
@@ -279,7 +280,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 emotion: instance.buddyState.emotion,
                 bubbleText: nil,
                 lookOffset: instance.currentLookOffset,
-                appearance: instance.character.appearance
+                appearance: instance.character.appearance,
+                scale: instance.character.scale
             )
             instance.windowController.setContent(content)
         }
@@ -315,7 +317,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             emotion: instance.buddyState.emotion,
             bubbleText: instance.buddyState.currentBubbleText,
             lookOffset: instance.currentLookOffset,
-            appearance: instance.character.appearance
+            appearance: instance.character.appearance,
+            scale: instance.character.scale
         )
         instance.windowController.setContent(content)
     }
