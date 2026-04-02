@@ -6,6 +6,7 @@ struct CharacterEditInlineView: View {
     @State var character: BuddyCharacter
     let store: CharacterStore
     var onSave: (BuddyCharacter) -> Void
+    var onPreview: ((BuddyCharacter) -> Void)?
 
     @State private var showingImagePicker = false
 
@@ -105,6 +106,9 @@ struct CharacterEditInlineView: View {
         .padding(8)
         .background(Color.gray.opacity(0.1))
         .cornerRadius(6)
+        .onChange(of: character) { _, newValue in
+            onPreview?(newValue)
+        }
         .fileImporter(
             isPresented: $showingImagePicker,
             allowedContentTypes: [.png],

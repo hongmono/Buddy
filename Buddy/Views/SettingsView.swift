@@ -11,6 +11,7 @@ struct SettingsView: View {
     var onCharacterAdded: ((BuddyCharacter) -> Void)?
     var onCharacterRemoved: ((UUID) -> Void)?
     var onCharacterUpdated: ((BuddyCharacter) -> Void)?
+    var onCharacterPreview: ((BuddyCharacter) -> Void)?
 
     var body: some View {
         Form {
@@ -19,7 +20,8 @@ struct SettingsView: View {
                     store: characterStore,
                     onCharacterAdded: onCharacterAdded,
                     onCharacterRemoved: onCharacterRemoved,
-                    onCharacterUpdated: onCharacterUpdated
+                    onCharacterUpdated: onCharacterUpdated,
+                    onCharacterPreview: onCharacterPreview
                 )
             }
 

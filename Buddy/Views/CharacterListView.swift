@@ -8,6 +8,7 @@ struct CharacterListView: View {
     var onCharacterAdded: ((BuddyCharacter) -> Void)?
     var onCharacterRemoved: ((UUID) -> Void)?
     var onCharacterUpdated: ((BuddyCharacter) -> Void)?
+    var onCharacterPreview: ((BuddyCharacter) -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -42,11 +43,15 @@ struct CharacterListView: View {
                     if editingCharacterId == character.id {
                         CharacterEditInlineView(
                             character: character,
-                            store: store
-                        ) { updated in
-                            onCharacterUpdated?(updated)
-                            editingCharacterId = nil
-                        }
+                            store: store,
+                            onSave: { updated in
+                                onCharacterUpdated?(updated)
+                                editingCharacterId = nil
+                            },
+                            onPreview: { updated in
+                                onCharacterPreview?(updated)
+                            }
+                        )
                         .padding(.top, 4)
                     }
                 }

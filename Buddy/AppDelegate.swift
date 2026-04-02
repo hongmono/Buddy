@@ -105,18 +105,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         instances[character.id] = instance
     }
 
-    func updateCharacter(_ character: BuddyCharacter) {
+    /// 비주얼만 실시간 업데이트 (AI 재시작 없음)
+    func previewCharacter(_ character: BuddyCharacter) {
         guard let instance = instances[character.id] else { return }
         instance.character = character
         instance.windowController.window.characterScale = CGFloat(character.scale)
-        // AI 성격이 바뀌었으면 재시작
-        instance.aiService.stop()
-        let newAI = AIService(name: character.name, personality: character.personality)
-        newAI.start { success in
-            print("\(character.name) AI reconnected: \(success)")
+        updateBlobView(for: character.id)
+    }
+
+    /// 저장 시 호출 — AI 성격 변경 반영
+    func updateCharacter(_ character: BuddyCharacter) {
+        guard let instance = instances[character.id] else { return }
+        let oldName = instance.character.name
+        let oldPersonality = instance.character.personality
+        instance.character = character
+        instance.windowController.window.characterScale = CGFloat(character.scale)
+        // AI 성격이 바뀌었을 때만 재시작
+        if oldName != character.name || oldPersonality != character.personality {
+            instance.aiService.stop()
+            let newAI = AIService(name: character.name, personality: character.personality)
+            newAI.start { success in
+                print("\(character.name) AI reconnected: \(success)")
+            }
+            instance.aiService = newAI
         }
-        instance.aiService = newAI
-        // 뷰 업데이트 (애니메이션)
         updateBlobView(for: character.id)
     }
 

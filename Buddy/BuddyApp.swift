@@ -29,6 +29,9 @@ struct BuddyApp: App {
                 },
                 onCharacterUpdated: { character in
                     appDelegate.updateCharacter(character)
+                },
+                onCharacterPreview: { character in
+                    appDelegate.previewCharacter(character)
                 }
             )
         }
