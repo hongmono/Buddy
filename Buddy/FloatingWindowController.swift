@@ -46,9 +46,11 @@ class FloatingWindowController {
 
     var onInteraction: ((PetInteraction) -> Void)?
 
-    init() {
+    init(scale: CGFloat = 1.0) {
         let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 800, height: 600)
-        let windowSize = NSRect(x: screen.maxX - 300, y: screen.minY + 20, width: 300, height: 200)
+        let w = max(300, 100 * scale + 200)  // 말풍선 공간 포함
+        let h = max(200, 90 * scale + 130)
+        let windowSize = NSRect(x: screen.maxX - w, y: screen.minY + 20, width: w, height: h)
         self.window = FloatingWindow(contentRect: windowSize)
         setupHoverTracking()
     }

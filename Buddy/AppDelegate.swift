@@ -65,7 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        let windowController = FloatingWindowController()
+        let windowController = FloatingWindowController(scale: CGFloat(character.scale))
         windowController.window.characterScale = CGFloat(character.scale)
         let buddyState = BuddyState()
         windowController.setContent(BuddyContentView(emotion: buddyState.emotion, bubbleText: nil, appearance: character.appearance, scale: character.scale))
