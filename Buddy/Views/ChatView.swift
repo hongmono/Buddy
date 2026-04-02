@@ -2,7 +2,7 @@
 import SwiftUI
 
 struct ChatView: View {
-    @Binding var messages: [ChatMessage]
+    @ObservedObject var messageStore: ChatMessageStore
     @State private var inputText: String = ""
     var onSend: (String) -> Void
 
@@ -31,17 +31,18 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 8) {
-                        ForEach(messages) { message in
+                        ForEach(messageStore.messages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
                     }
                     .padding(12)
                 }
-                .onChange(of: messages.count) { _ in
-                    if let last = messages.last {
-                        proxy.scrollTo(last.id, anchor: .bottom)
-                    }
+                .onChange(of: messageStore.messages.count) { _, _ in
+                    scrollToBottom(proxy: proxy)
+                }
+                .onAppear {
+                    scrollToBottom(proxy: proxy)
                 }
             }
 
@@ -85,6 +86,14 @@ struct ChatView: View {
         guard !text.isEmpty else { return }
         inputText = ""
         onSend(text)
+    }
+
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        if let last = messageStore.messages.last {
+            withAnimation(.easeOut(duration: 0.2)) {
+                proxy.scrollTo(last.id, anchor: .bottom)
+            }
+        }
     }
 }
 

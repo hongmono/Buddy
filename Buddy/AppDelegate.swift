@@ -9,6 +9,7 @@ class CharacterInstance {
     var buddyState: BuddyState
     var aiService: AIService
     var chatWindowController: ChatWindowController?
+    let chatMessages = ChatMessageStore()  // 채팅창 닫아도 히스토리 유지
     var onDeviceAI: Any?  // OnDeviceAIService (macOS 26+)
     var currentLookOffset: CGPoint = .zero
     var lastInteractionTime: Date = Date()
@@ -407,6 +408,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         instance.buddyState.showBubble(text: text, emotion: emotion)
         updateBlobView(for: id)
+
+        // 혼잣말도 채팅 히스토리에 쌓기
+        instance.chatMessages.add(ChatMessage(role: .assistant, content: text))
+
         DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 3...5)) { [weak self] in
             self?.instances[id]?.buddyState.dismissBubble()
             self?.updateBlobView(for: id)
@@ -458,15 +463,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             chat.close()
             instance.chatWindowController = nil
         } else {
-            let chat = ChatWindowController()
+            let chat = ChatWindowController(messageStore: instance.chatMessages)
             chat.onSendMessage = { [weak self] text in
                 self?.handleChatMessage(text, for: id)
+            }
+            chat.onClose = { [weak self] in
+                self?.instances[id]?.chatWindowController = nil
             }
             let frame = instance.windowController.window.frame
             chat.show(near: frame)
             instance.chatWindowController = chat
 
-            chat.addMessage(ChatMessage(role: .assistant, content: "뭐 할까? 😊"))
+            if chat.messageStore.messages.isEmpty {
+                chat.addMessage(ChatMessage(role: .assistant, content: "뭐 할까? 😊"))
+            }
         }
     }
 
