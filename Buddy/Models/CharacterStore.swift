@@ -27,7 +27,10 @@ class CharacterStore: ObservableObject {
         }
     }
 
+    static let maxCharacters = 5
+
     func add(_ character: BuddyCharacter) {
+        guard characters.count < Self.maxCharacters else { return }
         characters.append(character)
         save()
     }

@@ -35,21 +35,25 @@ struct CharacterListView: View {
                 .padding(.vertical, 2)
             }
 
-            Button {
-                let new = BuddyCharacter(name: "New Buddy")
-                store.add(new)
-                onCharacterAdded?(new)
-            } label: {
-                Label("캐릭터 추가", systemImage: "plus")
+            if store.characters.count < CharacterStore.maxCharacters {
+                Button {
+                    let new = BuddyCharacter(name: "New Buddy")
+                    store.add(new)
+                    onCharacterAdded?(new)
+                } label: {
+                    Label("캐릭터 추가", systemImage: "plus")
+                }
+                .padding(.top, 4)
             }
-            .padding(.top, 4)
         }
         .sheet(isPresented: $showingEdit) {
             if let char = selectedCharacter {
-                CharacterEditView(character: char, store: store) { updated in
+                CharacterEditView(character: char, store: store, onSave: { updated in
                     onCharacterUpdated?(updated)
                     showingEdit = false
-                }
+                }, onDismiss: {
+                    showingEdit = false
+                })
             }
         }
     }

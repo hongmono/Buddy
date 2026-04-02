@@ -6,6 +6,7 @@ struct CharacterEditView: View {
     @State var character: BuddyCharacter
     let store: CharacterStore
     var onSave: (BuddyCharacter) -> Void
+    var onDismiss: (() -> Void)?
 
     @State private var showingImagePicker = false
 
@@ -41,7 +42,7 @@ struct CharacterEditView: View {
 
             HStack {
                 Button("취소") {
-                    onSave(character) // dismiss
+                    onDismiss?()
                 }
                 Spacer()
                 Button("저장") {
