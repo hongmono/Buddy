@@ -94,6 +94,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         instances[character.id] = instance
     }
 
+    func setCharacterWindowsFloating(_ floating: Bool) {
+        let level: NSWindow.Level = floating ? .floating : .normal
+        for (_, instance) in instances {
+            instance.windowController.window.level = level
+        }
+    }
+
     func despawnCharacter(id: UUID) {
         guard let instance = instances[id] else { return }
         instance.resumeWalkTimer?.invalidate()

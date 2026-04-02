@@ -11,6 +11,8 @@ struct SettingsView: View {
     var onCharacterAdded: ((BuddyCharacter) -> Void)?
     var onCharacterRemoved: ((UUID) -> Void)?
     var onCharacterUpdated: ((BuddyCharacter) -> Void)?
+    var onSettingsOpen: (() -> Void)?
+    var onSettingsClose: (() -> Void)?
 
     var body: some View {
         Form {
@@ -64,6 +66,10 @@ struct SettingsView: View {
             AIService.findClaude { path in
                 claudeFound = path != nil
             }
+            onSettingsOpen?()
+        }
+        .onDisappear {
+            onSettingsClose?()
         }
     }
 
