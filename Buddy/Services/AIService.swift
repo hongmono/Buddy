@@ -9,11 +9,21 @@ class AIService {
 
     private var responseCallback: ((String) -> Void)?
 
-    private let systemPrompt = """
-    너는 "Buddy"라는 이름의 귀여운 유령 캐릭터야. macOS 화면에 살고 있어.
-    성격: 다정하고 장난기 있고, 약간 나른한 유령. 이모지를 가끔 쓰고, 반말로 짧게 말해.
-    말풍선용 응답은 1-2문장으로 아주 짧게. 채팅은 자연스럽게 대화해.
-    """
+    private let characterName: String
+    private let characterPersonality: String
+
+    private var systemPrompt: String {
+        """
+        너는 "\(characterName)"라는 이름의 귀여운 캐릭터야. macOS 화면에 살고 있어.
+        성격: \(characterPersonality). 이모지를 가끔 쓰고, 반말로 짧게 말해.
+        말풍선용 응답은 1-2문장으로 아주 짧게. 채팅은 자연스럽게 대화해.
+        """
+    }
+
+    init(name: String = "Buddy", personality: String = "다정하고 장난기 있고, 약간 나른한 유령") {
+        self.characterName = name
+        self.characterPersonality = personality
+    }
 
     private static var claudePath: String?
 
