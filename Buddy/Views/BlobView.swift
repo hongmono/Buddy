@@ -193,6 +193,7 @@ struct BuddyContentView: View {
     let emotion: Emotion
     let bubbleText: String?
     var lookOffset: CGPoint = .zero
+    var appearance: CharacterAppearance = .ghost
 
     var body: some View {
         VStack(spacing: 4) {
@@ -201,9 +202,27 @@ struct BuddyContentView: View {
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                     .animation(.easeInOut(duration: 0.3), value: bubbleText)
             }
-            BlobView(emotion: emotion, lookOffset: lookOffset)
+            characterView
         }
         .frame(maxWidth: 300, maxHeight: 200, alignment: .bottom)
+    }
+
+    @ViewBuilder
+    private var characterView: some View {
+        switch appearance {
+        case .ghost:
+            BlobView(emotion: emotion, lookOffset: lookOffset)
+        case .image(let filename):
+            let url = CharacterStore.imagesDirectory.appendingPathComponent(filename)
+            if let nsImage = NSImage(contentsOf: url) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 60, height: 70)
+            } else {
+                BlobView(emotion: emotion, lookOffset: lookOffset)
+            }
+        }
     }
 }
 
